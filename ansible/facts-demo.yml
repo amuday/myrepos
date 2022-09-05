@@ -1,0 +1,14 @@
+- hosts: all
+  vars:
+    var_name: var_val
+    var2: val2  
+  tasks:
+    - debug: 
+        msg: Hello world
+    - debug:
+        var: ansible_facts
+    - debug:
+        var: var_name  
+    - debug: 
+        msg: "{{ var_name}} {{var2}}"
+

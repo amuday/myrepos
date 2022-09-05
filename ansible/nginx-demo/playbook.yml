@@ -1,0 +1,30 @@
+---
+- hosts: webservers
+  become: True
+  vars:
+    repository: https://github.com/kodekloudhub/learning-app-ecommerce.git
+    httpd_port: 80  
+  tasks:
+    - name: Install httpd and php
+      yum:
+        name: httpd
+        state: present
+
+    - name: Install web role specific dependencies
+      yum: name=git state=present
+
+    - name: Set index.php as the default page
+      tags: "Set index.php as the default page"
+      replace:
+         path: /etc/httpd/conf/httpd.conf
+         regexp: 'DirectoryIndex index.html'
+         replace: 'DirectoryIndex index.php'
+
+    - name: http service state
+      service: name=httpd state=started enabled=yes
+
+    - name: Copy the code from repository
+      ansible.builtin.git: repo={{ repository }} dest=/var/www/html/  force=yes
+
+    - name: Creates the index.php file
+      template: src=templates/index.php.j2 dest=/var/www/html/index.php
