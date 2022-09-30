@@ -1,0 +1,4 @@
+1. create a db server and output the private IP
+2. create a webserver and ensure it has a fixed public IP
+3. create a security group for the webserver opening ports 80 and 443
+4. run the provided script on the webserver
