@@ -8,9 +8,11 @@ resource "aws_instance" "ec2" {
   instance_type = "t2.micro"
 }
 
+# first ec2 will be created then eip
 resource "aws_eip" "elasticip" {
   instance = aws_instance.ec2.id
 }
+
 
 output "eip" {
 
