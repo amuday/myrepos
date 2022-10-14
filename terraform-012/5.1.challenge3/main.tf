@@ -12,7 +12,7 @@ module "web" {
   source = "./web"
 }
 
-
+# getting output from child module
 output "dbserverPrivateIP" {
   value = module.db.dbserverPrivateIP
 

@@ -23,6 +23,7 @@ resource "aws_security_group" "webtraffic" {
   name = "Allow HTTPS"
 
   dynamic "ingress" {
+    # if you dont use iterator, loop variable can be accessed by using block name, in this case ingress.
     iterator = port
     for_each = var.ingressrules
     content {
