@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# concat
+string1="abc"
+string2="xyz"
+string=$string1$string2
+
+echo $string
 
 <<mycomment
 =	    equal
