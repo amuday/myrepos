@@ -1,0 +1,3 @@
+VM created on $(date) public ip is 3.95.211.113 
+VM created on Wed 11/09/2022 public ip is 44.204.168.98 
+VM created on Wed 11/09/2022 11:58:25.81 public ip is 34.238.39.161 
