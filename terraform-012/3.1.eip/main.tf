@@ -8,7 +8,9 @@ resource "aws_instance" "ec2" {
   instance_type = "t2.micro"
 }
 
+# implicit dependency - uses reference expressions.
 # first ec2 will be created then eip
+# in destroy - eip destroyed first then ec2
 resource "aws_eip" "elasticip" {
   instance = aws_instance.ec2.id
 }

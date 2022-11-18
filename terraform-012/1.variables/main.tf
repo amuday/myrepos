@@ -19,8 +19,9 @@ variable "enabled" {
   default = true
 }
 
+
+# in list all elements should be of same type
 variable "mylist" {
-  # list always of same type
   type    = list(string)
   default = ["value1", "value2"]
 }
@@ -33,13 +34,15 @@ variable "mymap" {
   }
 }
 
+# As the value is not specified, terraform will prompt the user to enter the data.
 variable "inputname" {
   type        = string
   description = "Enter VPC name"
 }
 
+# tuple - similar to list but can have different types
 variable "mytuple" {
-  type    = tuple([String, number, string])
+  type    = tuple([string, number, string])
   default = ["cat", 1, "dog"]
 }
 
@@ -52,6 +55,17 @@ variable "myobject" {
 }
 
 
+variable "servers" {
+  type = list(object({
+    name   = string,
+    size   = string,
+    image  = string,
+    region = string,
+    tags   = list(string)
+  }))
+}
+
+
 
 resource "aws_vpc" "myvpc" {
   cidr_block = "10.0.0.0/16"
@@ -60,7 +74,4 @@ resource "aws_vpc" "myvpc" {
   }
 }
 
-output "vpcid" {
-  value = aws_vpc.myvpc.id
-}
 
