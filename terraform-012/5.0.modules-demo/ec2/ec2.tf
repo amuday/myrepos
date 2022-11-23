@@ -13,7 +13,8 @@ resource "aws_instance" "ec2" {
   }
 }
 
-
+# root module can access this output
+# child module cant print this value in the console, use root module for that. 
 output "instance_id" {
   value = aws_instance.ec2.id
 }

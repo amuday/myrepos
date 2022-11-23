@@ -4,6 +4,7 @@ provider "aws" {
 
 module "db" {
   source       = "./db"
+  # passing arguments to child module
   server_names = ["mariadb", "mysql", "mssql"]
 
 }

@@ -38,7 +38,7 @@ resource "aws_security_group" "websg" {
   dynamic "ingress" {
     # iterator is optional. if not provided access use the block name, in this case it is ingress and ingress.value
     # The iterator argument (optional) sets the name of a temporary variable that represents the current element of the complex value. 
-    # If omitted, the name of the variable defaults to the label of the dynamic block ("setting" in the example above).
+    # If omitted, the name of the variable defaults to the label of the dynamic block ("ingress" in the example above).
     iterator = port
     for_each = var.ingressrules
     content {

@@ -5,7 +5,9 @@ provider "aws" {
 
 
 module "ec2module" {
+  # relative path to the module
   source = "./ec2"
+  # pass variable to the module. ec2name is a variable in the ec2 module.
   ec2name = "Name Provided from Module"
 }
 

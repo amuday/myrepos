@@ -24,6 +24,9 @@ resource "aws_security_group" "webtraffic" {
 
   dynamic "ingress" {
     # if you dont use iterator, loop variable can be accessed by using block name, in this case ingress.
+    # iterator is optional. if not provided access values using the block name, in this case it is ingress and ingress.value
+    # The iterator argument (optional) sets the name of a temporary variable that represents the current element of the complex value. 
+    # If omitted, the name of the variable defaults to the label of the dynamic block ("ingress" in the example above).
     iterator = port
     for_each = var.ingressrules
     content {
