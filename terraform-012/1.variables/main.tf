@@ -9,6 +9,15 @@ variable "vpcname" {
   # nullable - Specify if the variable can be null within the module.
 }
 
+# commented as not required to create vpc everytime
+/*
+resource "aws_vpc" "myvpc" {
+  cidr_block = "10.0.0.0/16"
+  tags = {
+    "Name" = var.inputname
+  }
+}
+*/
 variable "sshport" {
   type    = number
   default = 22
@@ -65,13 +74,10 @@ variable "servers" {
   }))
 }
 
-
-
-resource "aws_vpc" "myvpc" {
-  cidr_block = "10.0.0.0/16"
-  tags = {
-    "Name" = var.inputname
-  }
+variable "ec2_instances" {
+  
 }
+
+
 
 
