@@ -1,3 +1,5 @@
+Working as expected 
+
 objective:
     list S3 buckets to show case how to access AWS services from EKS private subnets.
         Create an IAM Role and IAM policy
@@ -7,6 +9,7 @@ objective:
             Annotate service account with aws_iam_role.irsa_iam_role.arn
         Temporary credentials are provided to access s3 bucket
 
+EKS JWT token -> AWS Federated -> JWT to STS -> STS will send temporary credential -> Access AWS Services
 
 verify 
     IAM -> Identity providers
