@@ -6,3 +6,4 @@ terraform.tfstate.backup
 *.zip
 *.exe
 *.pub
+*.svg
