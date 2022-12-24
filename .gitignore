@@ -5,3 +5,4 @@ terraform.tfstate.backup
 *.pem
 *.zip
 *.exe
+*.pub
