@@ -26,3 +26,4 @@
 
 # DNS
 Add DNS server names into domain name service (free norm)
+*** its not tested ***
