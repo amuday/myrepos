@@ -36,6 +36,7 @@
         http://20.115.112.222/app1/
         http://20.115.112.222/app1/metadata.html
 
+        http://20.115.112.222/app2/index.html
         http://20.115.112.222/app2/hostname.html
         http://20.115.112.222/app2/status.html
         http://20.115.112.222/app2/metadata.html
