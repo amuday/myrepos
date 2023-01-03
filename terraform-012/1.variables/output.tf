@@ -54,3 +54,13 @@ output "capacity_reservation_preference"{
   # value = var.ec2_instances[0].capacity_reservation_specification[*].capacity_reservation_preference
 
 }
+
+
+output "paths" {
+  value = [path.cwd, path.module, path.root]
+}
+
+output "meta_info" {
+  value = [terraform.workspace]
+  
+}
