@@ -8,7 +8,7 @@ resource "azurerm_network_security_group" "web_vmss_nsg" {
     for_each = var.web_vmss_nsg_inbound_ports
     content {
       name                       = "inbound-rule-${security_rule.key}"
-      description                = "Inbound Rule ${security_rule.key}"    
+      description                = "Inbound Rule ${security_rule.key}"
       priority                   = sum([100, security_rule.key])
       direction                  = "Inbound"
       access                     = "Allow"
@@ -16,7 +16,7 @@ resource "azurerm_network_security_group" "web_vmss_nsg" {
       source_port_range          = "*"
       destination_port_range     = security_rule.value
       source_address_prefix      = "*"
-      destination_address_prefix = "*"      
+      destination_address_prefix = "*"
     }
   }
 
