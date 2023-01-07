@@ -28,11 +28,11 @@ locals {
 }
 # Resource-3: httpd conf files upload to httpd-files-container
 resource "azurerm_storage_blob" "httpd_files_container_blob" {
-  for_each = toset(local.httpd_conf_files)
+  for_each               = toset(local.httpd_conf_files)
   name                   = each.value
   storage_account_name   = azurerm_storage_account.storage_account.name
   storage_container_name = azurerm_storage_container.httpd_files_container.name
   type                   = "Block"
-  source = "${path.module}/app-scripts/${each.value}"
+  source                 = "${path.module}/app-scripts/${each.value}"
 }
 

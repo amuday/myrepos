@@ -1,6 +1,6 @@
 # Locals Block for custom data
 locals {
-appvm_custom_data = <<CUSTOM_DATA
+  appvm_custom_data = <<CUSTOM_DATA
 #!/bin/sh
 sudo yum install -y httpd
 sudo systemctl enable httpd
@@ -20,7 +20,7 @@ CUSTOM_DATA
 
 # Resource: Azure Linux Virtual Machine Scale Set - App1
 resource "azurerm_linux_virtual_machine_scale_set" "app_vmss" {
-  name                = "${local.resource_name_prefix}-app-vmss"
+  name = "${local.resource_name_prefix}-app-vmss"
   #computer_name_prefix = "vmss-app1" # if name argument is not valid one for VMs, we can use this for VM Names
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
@@ -30,14 +30,14 @@ resource "azurerm_linux_virtual_machine_scale_set" "app_vmss" {
 
   admin_ssh_key {
     username   = "azureuser"
-    public_key = file("${path.module}/ssh-keys/terraform-azure.pub")
+    public_key = tls_private_key.this.public_key_openssh
   }
 
   source_image_reference {
     publisher = "RedHat"
-    offer = "RHEL"
-    sku = "83-gen2"
-    version = "latest"
+    offer     = "RHEL"
+    sku       = "83-gen2"
+    version   = "latest"
   }
 
   os_disk {
@@ -46,20 +46,20 @@ resource "azurerm_linux_virtual_machine_scale_set" "app_vmss" {
   }
 
   upgrade_mode = "Automatic"
-  
+
   network_interface {
-    name    = "app-vmss-nic"
-    primary = true
+    name                      = "app-vmss-nic"
+    primary                   = true
     network_security_group_id = azurerm_network_security_group.app_vmss_nsg.id
     ip_configuration {
-      name      = "internal"
-      primary   = true
-      subnet_id = azurerm_subnet.appsubnet.id  
+      name                                   = "internal"
+      primary                                = true
+      subnet_id                              = azurerm_subnet.appsubnet.id
       load_balancer_backend_address_pool_ids = [azurerm_lb_backend_address_pool.app_lb_backend_address_pool.id]
     }
   }
   #custom_data = filebase64("${path.module}/app-scripts/redhat-app1-script.sh")      
-  custom_data = base64encode(local.appvm_custom_data)  
+  custom_data = base64encode(local.appvm_custom_data)
 }
-  
+
 
