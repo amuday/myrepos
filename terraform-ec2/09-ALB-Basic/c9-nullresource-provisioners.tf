@@ -7,12 +7,13 @@ resource "null_resource" "name" {
     host        = aws_eip.bastion_eip.public_ip
     user        = "ec2-user"
     password    = ""
-    private_key = file("private-key/terraform-key.pem")
+    private_key = tls_private_key.this.private_key_openssh
   }
 
   ## File Provisioner: Copies the terraform-key.pem file to /tmp/terraform-key.pem
   provisioner "file" {
-    source      = "private-key/terraform-key.pem"
+    #source      = "private-key/terraform-key.pem"
+    content     = tls_private_key.this.private_key_pem
     destination = "/tmp/terraform-key.pem"
   }
   ## Remote Exec Provisioner: Using remote-exec provisioner fix the private key permissions on Bastion Host
