@@ -219,6 +219,13 @@ terraform apply -auto-approve
 
 ## Step-09: Verify Resources
 ```t
+
+# New Resources
+1. Managed Identities
+2. Key vault
+    certificates
+    Access polices
+3. Load balancer -> listener -> https -> certificate
 # Azure Virtual Network Resources
 1. Azure Virtual Network
 2. Web, App, DB, Bastion and AG Subnets
@@ -291,3 +298,5 @@ terraform apply -destroy -auto-approve
 rm -rf .terraform* 
 rm -rf terraform.tfstate*
 ```
+
+
