@@ -12,8 +12,8 @@ resource "aws_instance" "test_ec2_instance" {
   instance_type          = "t2.micro"
   key_name               = aws_key_pair.generated_key.key_name
   vpc_security_group_ids = [aws_security_group.instance.id]
-  user_data              = file("${path.module}/scripts/app1.sh")
-  #user_data              = data.template_file.script.rendered
+  #user_data              = file("${path.module}/scripts/app1.sh")
+  user_data = data.template_file.script.rendered
   tags = merge(
     { Name = "server-${count.index}" },
     local.common_tags
