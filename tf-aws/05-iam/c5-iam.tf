@@ -1,3 +1,5 @@
+# trust policy - defines which identities can assume the role
+# Trust policy is an example of Resource based policy. Below is resource based policy - because it has principal
 resource "aws_iam_role" "s3_bucket_role" {
   name = "s3_bucket_role"
 
@@ -27,6 +29,9 @@ resource "aws_iam_instance_profile" "s3_bucket_role_instance_profile" {
   role = aws_iam_role.s3_bucket_role.name
 }
 
+# permission policy - define what actions and resources the role can use
+# permission policy is an example of identity based policy
+# defines which AWS resources the IAM role can access.
 resource "aws_iam_role_policy" "s3_bucket_role_policy" {
   name = "s3_bucket_role_policy"
   role = aws_iam_role.s3_bucket_role.id
