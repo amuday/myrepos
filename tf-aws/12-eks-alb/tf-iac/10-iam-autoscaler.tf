@@ -51,6 +51,8 @@ output "eks_cluster_autoscaler_arn" {
   value = aws_iam_role.eks_cluster_autoscaler.arn
 }
 
+# Initially used cluster name from the eks cluster resource instead of variable, due to dependency issue got an error 
+# and replaced with variable name and worked without any issue.
 data "kubectl_path_documents" "cluster_role" {
   pattern = "${path.module}/k8s/cluster-autoscaler.yaml"
 

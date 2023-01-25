@@ -20,6 +20,15 @@ terraform {
     }
 
   }
+
+   backend "s3" {
+    bucket = "terraform-aws-eks-ukam"
+    key    = "dev/eks-cluster/terraform.tfstate"
+    region = "us-east-1"
+
+    # For State Locking
+    dynamodb_table = "dev-ekscluster"
+  }
 }
 
 
@@ -38,4 +47,10 @@ provider "helm" {
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.demo.certificate_authority[0].data)
     token                  = data.aws_eks_cluster_auth.demo.token
   }
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.demo.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.demo.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.demo.token
 }
