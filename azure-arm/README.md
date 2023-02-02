@@ -81,7 +81,7 @@ New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-de
 Get-ChildItem *.ps1, *.psd1, *.ps1xml, *.psm1 -Recurse | Unblock-File
 Import-Module .\arm-ttk.psd1
 Test-AzTemplate -TemplatePath validate.json
-        ```
+```
 
 # IAC and Azure DevOps
 
