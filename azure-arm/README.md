@@ -1,3 +1,11 @@
+
+ARM templates use declarative syntax, means define the desired state not the detailed steps to create the infrastructure.
+
+
+https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/storageaccounts?tabs=json&pivots=deployment-language-bicep
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-complete-mode-deletion
+https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/test-toolkit
+
 ```
 Connect-AzAccount
 Get-AzResourceGroup
