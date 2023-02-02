@@ -23,6 +23,7 @@ New-AzResourceGroupDeployment -Name myfirsttemplate -ResourceGroupName sre-dev-0
 
 # Validation
 
+
 In the portal Resource Group -> Deployments -> Template.
 
 Resource Group -> Deployments -> Template -> deploy 
@@ -93,3 +94,10 @@ Test-AzTemplate -TemplatePath validate.json
 
 # IAC and Azure DevOps
 
+1. Create Azure Devops account and login
+2. Create a repository 
+3. Upload the template file to repository 
+4. Create a pipeline, select Aure Repos Git
+5. Configure pipeline, select starter pipeline
+6. Project Settings -> Service Connections -> Azure Resource Manager 
+7. Add Azure Resource Manger to the email pipeline
