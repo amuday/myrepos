@@ -1,12 +1,17 @@
-
+```
 Connect-AzAccount
 Get-AzResourceGroup
+```
 
 # Create resource group
+```
 New-AzResourceGroup -Name sre-dev-001 -location eastus
+```
 
 # Deploy template
+```
 New-AzResourceGroupDeployment -Name myfirsttemplate -ResourceGroupName sre-dev-001 -TemplateFile basic-az-deploy.json
+```
 
 # Validation
 
@@ -23,8 +28,9 @@ Resource Group -> Deployments -> Template -> overview
 VM -> Connect -> RDP                                    
 
 # Parameters 
-## command 
+```
 New-AzResourceGroupDeployment -Name newstorage -ResourceGroupName sre-dev-001 -TemplateFile parameter-deploy.json -stgname udaysstg001
+```
 
 # Output Parameters
 
@@ -51,24 +57,31 @@ validation
 
 # Preview
 
-## commands
-
+#### commands
+```
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -WhatIf
 
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -WhatIf -WhatIfResultFormat FullResourcePayloads
 
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -WhatIf -WhatIfResultFormat ResourceIdOnly
- 
+```
+
 ## Confirm Yes or NO
 
+```
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -Confirm
 
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -Confirm -Mode Complete
-
+```
 # validate
-## Install toolkit
+#### Install toolkit
     1. Download the zip from https://github.com/Azure/arm-ttk/releases and extract and run below commands
     2. Run commands below
+        ```
         Get-ChildItem *.ps1, *.psd1, *.ps1xml, *.psm1 -Recurse | Unblock-File
         Import-Module .\arm-ttk.psd1
         Test-AzTemplate -TemplatePath validate.json
+        ```
+
+# IAC and Azure DevOps
+
