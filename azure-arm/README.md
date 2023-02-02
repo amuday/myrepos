@@ -23,7 +23,7 @@ Resource Group -> Deployments -> Template -> overview
 VM -> Connect -> RDP                                    
 
 # Parameters 
-* command 
+## command 
 New-AzResourceGroupDeployment -Name newstorage -ResourceGroupName sre-dev-001 -TemplateFile parameter-deploy.json -stgname udaysstg001
 
 # Output Parameters
@@ -43,30 +43,32 @@ validation
 	Get-AzStorageAccount -Name storage12789 -ResourceGroupName sre-dev-001 | Get-Member
 
 # deployment mode
-    * complete - delete resources in resource group which are not in the template
+    ## complete - delete resources in resource group which are not in the template
 
     New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -Mode Complete
 
-    * Default mode is incremental, which does not delete resources in resource group and not in the template.        
+    ## Default mode is incremental, which does not delete resources in resource group and not in the template.        
 
 # Preview
 
-* commands
+## commands
+
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -WhatIf
 
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -WhatIf -WhatIfResultFormat FullResourcePayloads
 
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -WhatIf -WhatIfResultFormat ResourceIdOnly
  
-* Confirm Yes or NO
+## Confirm Yes or NO
+
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -Confirm
 
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -Confirm -Mode Complete
 
 # validate
-Install toolkit
+## Install toolkit
     1. Download the zip from https://github.com/Azure/arm-ttk/releases and extract and run below commands
     2. Run commands below
-    Get-ChildItem *.ps1, *.psd1, *.ps1xml, *.psm1 -Recurse | Unblock-File
-    Import-Module .\arm-ttk.psd1
-    Test-AzTemplate -TemplatePath validate.json
+        Get-ChildItem *.ps1, *.psd1, *.ps1xml, *.psm1 -Recurse | Unblock-File
+        Import-Module .\arm-ttk.psd1
+        Test-AzTemplate -TemplatePath validate.json
