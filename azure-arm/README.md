@@ -13,7 +13,9 @@ Get-AzResourceGroup
 
 # Create resource group
 ```
+az group create -l eastus -n sre-dev-001
 New-AzResourceGroup -Name sre-dev-001 -location eastus
+
 ```
 
 # Deploy template
@@ -38,6 +40,12 @@ VM -> Connect -> RDP
 
 # Parameters 
 ```
+az deployment group create --resource-group sre-dev-001 --template-file parameter-deploy.json --parameters stgname=udaysstg001 --debug
+
+az deployment group create --resource-group sre-dev-001 --template-file parameter-deploy.json --parameters @parameters.json --debug
+
+az resource delete --resource-group sre-dev-001 --ids  /subscriptions/cdfcbefc-2caf-465b-8b95-4b323c07be93/resourceGroups/sre-dev-001/providers/Microsoft.Storage/storageAccounts/udaysstg001 --debug
+
 New-AzResourceGroupDeployment -Name newstorage -ResourceGroupName sre-dev-001 -TemplateFile parameter-deploy.json -stgname udaysstg001
 ```
 
@@ -68,6 +76,8 @@ validation
 
 #### commands
 ```
+az deployment group what-if --resource-group sre-dev-001 --template-file parameter-deploy.json --parameters stgname=udaysstg001
+
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -WhatIf
 
 New-AzResourceGroupDeployment -Name TestDeploymentMode -ResourceGroupName sre-dev-001 -TemplateFile .\preview.json -WhatIf -WhatIfResultFormat FullResourcePayloads
@@ -101,3 +111,5 @@ Test-AzTemplate -TemplatePath validate.json
 5. Configure pipeline, select starter pipeline
 6. Project Settings -> Service Connections -> Azure Resource Manager 
 7. Add Azure Resource Manger to the email pipeline
+8. Request to increase free parallelism in Azure DevOps
+9. Run the pipeline.
