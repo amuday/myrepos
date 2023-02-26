@@ -2,6 +2,7 @@
 
 set -ex 
 
+# Refresh lvm state
 vgchange -ay
 
 DEVICE_FS=`blkid -o value -s TYPE ${DEVICE} || echo ""`
