@@ -1,10 +1,12 @@
 package test
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 
-	//"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
+	//"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
 	"github.com/gruntwork-io/terratest/modules/azure"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	"github.com/stretchr/testify/assert"
@@ -30,8 +32,11 @@ func TestTerraformAzureExample(t *testing.T) {
 	resourceGroupName := terraform.Output(t, terraformOptions, "resource_group_name")
 
 	// Look up the size of the given Virtual Machine
-	actualVMSize := azure.GetSizeOfVirtualMachine(t, vmName, resourceGroupName, "")
-	expectedVMSize := compute.VirtualMachineSizeTypes("Standard_D2s_v3")
+	actualVMSize := string(azure.GetSizeOfVirtualMachine(t, vmName, resourceGroupName, ""))
+	expectedVMSize := string(armcompute.VirtualMachineSizeTypes(terraform.Output(t, terraformOptions, "vm_size")))
+
+	fmt.Printf("actualVMSize: %s\n", reflect.TypeOf(actualVMSize))
+	fmt.Printf("expectedVMSize: %s\n", reflect.TypeOf(expectedVMSize))
 
 	// Test that the Virtual Machine size matches the Terraform specification
 	assert.Equal(t, expectedVMSize, actualVMSize)

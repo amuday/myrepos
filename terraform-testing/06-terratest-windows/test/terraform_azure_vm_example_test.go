@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
-	//"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
+	//"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2022-08-01/compute"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute"
 	"github.com/gruntwork-io/terratest/modules/azure"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
@@ -51,7 +51,7 @@ func testStrategiesForVMs(t *testing.T, terraformOptions *terraform.Options, sub
 	// Run `terraform output` to get the values of output variables.
 	resourceGroupName := terraform.Output(t, terraformOptions, "resource_group_name")
 	virtualMachineName := terraform.Output(t, terraformOptions, "vm_name")
-	expectedVMSize := compute.VirtualMachineSizeTypes(terraform.Output(t, terraformOptions, "vm_size"))
+	expectedVMSize := armcompute.VirtualMachineSizeTypes(terraform.Output(t, terraformOptions, "vm_size"))
 
 	// 1. Check the VM Size directly. This strategy gets one specific property of the VM per method.
 	actualVMSize := azure.GetSizeOfVirtualMachine(t, virtualMachineName, resourceGroupName, subscriptionID)
