@@ -10,6 +10,12 @@ output "op_ami_ids" {
 }
 
 
+output "routetables" {
+  value = [for rt in data.aws_route_tables.main.ids: rt.id ]
+  #value = data.aws_route_tables.main.ids
+  
+}
+
 /*
 output "ami_name" {
     value = "${data.aws_ami.get_amis}"

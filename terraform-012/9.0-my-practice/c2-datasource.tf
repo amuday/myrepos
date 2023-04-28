@@ -22,3 +22,11 @@ data "aws_ami_ids" "ubuntu" {
     values = ["ubuntu/images/ubuntu-*-*-amd64-server-*"]
   }
 }
+
+data "aws_vpc" "main" {
+  default = true
+}
+
+data "aws_route_tables" "main" {
+  vpc_id = data.aws_vpc.main.id
+}

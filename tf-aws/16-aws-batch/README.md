@@ -2,6 +2,11 @@
 
 Created ECR repository manually. You can automate it if needed.
 
+# scope
+    Deploy batch definitions
+    Create event bridge schedule to run batch for every 5 min
+
+
 # python image
     check for vulnerabilites section
 https://hub.docker.com/_/python/tags?page=1&name=3.11.3-slim

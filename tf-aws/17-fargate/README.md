@@ -9,3 +9,8 @@ Option 2:
     
 # autoscaling is disabled
     Its working but commented the code
+
+# scope
+Define ECS service and task definition
+
+Service will keep the task running always

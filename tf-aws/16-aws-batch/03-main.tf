@@ -1,3 +1,7 @@
+data "aws_route_table" "main" {
+  vpc_id = data.aws_vpc.default.id
+}
+
 ################################################################################
 # Compute Environment(s)
 ################################################################################
@@ -5,7 +9,7 @@ resource "aws_batch_compute_environment" "this" {
   compute_environment_name = "batch-compute-env"
 
   compute_resources {
-    max_vcpus          = 4
+    max_vcpus = 4
     #security_group_ids = [aws_security_group.this.id]
     security_group_ids = [aws_security_group.vpc_endpoint.id]
     subnets            = data.aws_subnets.default.ids
@@ -48,11 +52,11 @@ resource "aws_batch_job_definition" "this" {
       platformVersion = "LATEST"
     }
 
-    /*
-    networkConfiguration = { 
-        "assignPublicIp" = "ENABLED"
+    # if commented then enable vpc endpoints
+    networkConfiguration = {
+      "assignPublicIp" = "ENABLED"
     }
-    */
+
 
     resourceRequirements = [
       {
@@ -68,13 +72,13 @@ resource "aws_batch_job_definition" "this" {
     executionRoleArn = aws_iam_role.ecs_task_execution_role.arn
 
     logConfiguration = {
-          logDriver = "awslogs"
-          options = {
-            awslogs-group         = aws_cloudwatch_log_group.this.id
-            awslogs-region        = var.region
-            awslogs-stream-prefix = "test_batch_job_definition"
-          }
-        }
+      logDriver = "awslogs"
+      options = {
+        awslogs-group         = aws_cloudwatch_log_group.this.id
+        awslogs-region        = var.region
+        awslogs-stream-prefix = "test_batch_job_definition"
+      }
+    }
 
   })
 }
@@ -85,4 +89,25 @@ resource "aws_cloudwatch_log_group" "this" {
   retention_in_days = 1
 
   #tags = local.tags
+}
+
+resource "aws_scheduler_schedule" "example" {
+  name = "my-schedule"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  schedule_expression = "rate(5 minutes)"
+
+  target {
+    arn      = "arn:aws:scheduler:::aws-sdk:batch:submitJob"
+    role_arn = aws_iam_role.ecs_task_execution_role.arn
+
+    input = jsonencode({
+      JobDefinition : "${aws_batch_job_definition.this.name}"
+      JobName : "myjob"
+      JobQueue : "${aws_batch_job_queue.this.name}"
+    })
+  }
 }
