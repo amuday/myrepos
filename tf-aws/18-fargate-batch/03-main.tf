@@ -15,6 +15,7 @@ resource "aws_ecs_task_definition" "main" {
   cpu                      = "256"
 
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
+  # below can be different
   task_role_arn      = aws_iam_role.ecs_task_execution_role.arn
 
   container_definitions = <<TASK_DEFINITION

@@ -1,4 +1,9 @@
 
+# Pre requisite
+Run job to create docker image and push into AWS 
+    https://gitlab.com/aws6570716/aws-batch
+
+
 # ECR access
 Option 1: 
     Here enabling public IP for container
@@ -14,3 +19,7 @@ Option 2:
 Define ECS service and task definition
 
 Service will keep the task running always
+
+
+# validation 
+    check cloudwatch log groups

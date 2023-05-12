@@ -69,7 +69,10 @@ resource "aws_batch_job_definition" "this" {
       }
     ]
 
+    # This role is only start the execution
     executionRoleArn = aws_iam_role.ecs_task_execution_role.arn
+    # this role is needed by container to access other resources
+    # jobRoleArn = 
 
     logConfiguration = {
       logDriver = "awslogs"

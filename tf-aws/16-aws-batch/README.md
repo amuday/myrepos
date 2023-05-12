@@ -7,6 +7,11 @@ Created ECR repository manually. You can automate it if needed.
     Create event bridge schedule to run batch for every 5 min
 
 
+# Pre requisite
+Run job to create docker image and push into AWS 
+    https://gitlab.com/aws6570716/aws-batch
+
+
 # python image
     check for vulnerabilites section
 https://hub.docker.com/_/python/tags?page=1&name=3.11.3-slim
@@ -36,3 +41,6 @@ VPC Endpoints allow you to have private containers, pulled from ECR repositories
 
 Run gitlab pipeline from gitlab
 Run terraform code from local machine
+
+# validation 
+    check cloudwatch log groups
