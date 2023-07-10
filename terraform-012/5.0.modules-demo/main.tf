@@ -17,3 +17,11 @@ output "module_output" {
     # syntax : module.<module name>.<child output variable name>
   value = module.ec2module.instance_id
 }
+
+
+module "ec2module_2" {
+  # relative path to the module
+  source = "./ec2"
+  # pass variable to the module. ec2name is a variable in the ec2 module.
+  ec2name = "Name Provided from Module"
+}
