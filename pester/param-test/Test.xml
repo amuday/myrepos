@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<testsuites xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="junit_schema_4.xsd" name="Pester" tests="1" errors="0" failures="0" disabled="0" time="1.092">
+  <testsuite name="E:\cloud_devops_local\github-devops-repo\pester\param-test\param.Tests.ps1" tests="1" errors="0" failures="0" hostname="LAPTOP-18SOR97C" id="0" skipped="0" disabled="0" package="E:\cloud_devops_local\github-devops-repo\pester\param-test\param.Tests.ps1" time="1.092">
+    <properties>
+      <property name="machine-name" value="LAPTOP-18SOR97C" />
+      <property name="cwd" value="E:\cloud_devops_local\github-devops-repo\pester\param-test" />
+      <property name="platform" value="Microsoft Windows 10 Pro|C:\WINDOWS|\Device\Harddisk0\Partition3" />
+      <property name="junit-version" value="4" />
+      <property name="user" value="udayk" />
+      <property name="framework-version" value="5.5.0" />
+      <property name="clr-version" value="7.0.9" />
+      <property name="user-domain" value="LAPTOP-18SOR97C" />
+      <property name="os-version" value="10.0.19045" />
+    </properties>
+    <testcase name="A suite.my first test" status="Passed" classname="E:\cloud_devops_local\github-devops-repo\pester\param-test\param.Tests.ps1" assertions="0" time="0.197" />
+  </testsuite>
+</testsuites>

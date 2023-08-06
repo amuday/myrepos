@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<testsuites xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="junit_schema_4.xsd" name="Pester" tests="1" errors="0" failures="1" disabled="0" time="0.190">
+  <testsuite name="E:\cloud_devops_local\github-devops-repo\pester\tf-fmt-test\tf-fmt-pester.Tests.ps1" tests="1" errors="0" failures="1" hostname="LAPTOP-18SOR97C" id="0" skipped="0" disabled="0" package="E:\cloud_devops_local\github-devops-repo\pester\tf-fmt-test\tf-fmt-pester.Tests.ps1" time="0.190">
+    <properties>
+      <property name="user-domain" value="LAPTOP-18SOR97C" />
+      <property name="cwd" value="E:\cloud_devops_local\github-devops-repo\pester\tf-fmt-test" />
+      <property name="junit-version" value="4" />
+      <property name="platform" value="Microsoft Windows 10 Pro|C:\WINDOWS|\Device\Harddisk0\Partition3" />
+      <property name="os-version" value="10.0.19045" />
+      <property name="framework-version" value="5.5.0" />
+      <property name="machine-name" value="LAPTOP-18SOR97C" />
+      <property name="user" value="udayk" />
+      <property name="clr-version" value="7.0.9" />
+    </properties>
+    <testcase name=".\iam.tf.Terraform format.Be Well formatted" status="Failed" classname="E:\cloud_devops_local\github-devops-repo\pester\tf-fmt-test\tf-fmt-pester.Tests.ps1" assertions="0" time="0.022">
+      <failure message="Expected $null or empty, but got 'iam.tf'.">at $LinterResults | Should -BeNullOrEmpty -ErrorAction Ignore, E:\cloud_devops_local\github-devops-repo\pester\tf-fmt-test\tf-fmt-pester.Tests.ps1:38
+at &lt;ScriptBlock&gt;, E:\cloud_devops_local\github-devops-repo\pester\tf-fmt-test\tf-fmt-pester.Tests.ps1:38</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -11,7 +11,7 @@ provider "azurerm" {
   # Configuration options
   #subscription_id = "6be8a5c0-01e9-4fda-8034-3405c47f87bf"
 
-  # get below from app registrations
+  # get below from app registrations. Create an app registration and get client id from there
   #tenant_id = "588bdde1-4178-4c13-96e6-3d214b90c98c"
   #client_id = "7cff38c5-2d42-4ec1-abcc-27631e3ce0bf"
 
