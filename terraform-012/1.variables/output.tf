@@ -21,6 +21,14 @@ output "myobject" {
   value = var.myobject
 }
 
+output "get_list_value" {
+  value = var.mylist[0]
+}
+
+output "get_map_value" {
+  value = var.mymap["key1"]
+}
+
 output "myserver_1" {
   value = var.servers[*].region
 }

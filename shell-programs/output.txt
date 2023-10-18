@@ -1,0 +1,2 @@
+  source = "./modules/my-gitlab-file-module?ref=main"
+  source = "./modules/storage-account?ref=main"
