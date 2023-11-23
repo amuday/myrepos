@@ -1,0 +1,23 @@
+parameters:
+  - title: First form step
+    required:
+        - text-a
+    properties:
+      text-a:
+        title: Some text A
+        type: string
+  - title: Second form step
+    required:
+      - text-b
+    properties:
+      text-b:
+        title: Some text A
+        type: string
+steps: 
+  - id: fetch-base
+    name: Fetch Base
+    action: fetch:template   
+input:
+      url: ./template
+      values:
+        name: ${{parameters.name}}

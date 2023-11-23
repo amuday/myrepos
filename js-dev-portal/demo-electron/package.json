@@ -1,0 +1,25 @@
+{
+  "name": "demo-electron",
+  "version": "1.0.0",
+  "description": "Master Electron Course Code",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "watch": "nodemon --exec electron .",
+    "reset": "git reset --hard"
+  },
+  "repository": "https://github.com/stackacademytv/master-electron",
+  "keywords": [
+    "Electron",
+    "Demo Electron",
+    "demo"
+  ],
+  "author": "GitHub, Stackacademytv",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron-window-state": "^5.0.3"
+  },
+  "dependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

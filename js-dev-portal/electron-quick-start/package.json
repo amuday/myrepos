@@ -1,0 +1,27 @@
+{
+  "name": "electron-quick-start",
+  "version": "1.0.0",
+  "description": "App to optimize images",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "watch": "nodemon --exec electron .",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
+  },
+  "author": "uday",
+  "license": "ISC",
+  "devDependencies": {
+    "@electron-forge/cli": "^6.4.2",
+    "@electron-forge/maker-deb": "^6.4.2",
+    "@electron-forge/maker-rpm": "^6.4.2",
+    "@electron-forge/maker-squirrel": "^6.4.2",
+    "@electron-forge/maker-zip": "^6.4.2",
+    "@electron-forge/plugin-auto-unpack-natives": "^6.4.2",
+    "electron": "^27.0.1",
+    "nodemon": "^3.0.1"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  }
+}
