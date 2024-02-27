@@ -10,3 +10,6 @@ terraform.tfstate.backup
 */local-exec-output-files/*
 */19-project/*
 electron/*
+config.py
+__pycache__
+aws-cert-code

@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<testExecutions>
+  <file path="E:\cloud_devops_local\github-devops-repo\pester\code-coverage\tests\CoverageTest.Tests.ps1" />
+  <file path="E:\cloud_devops_local\github-devops-repo\pester\code-coverage\tests\CoverageTest2.Tests.ps1" />
+</testExecutions>

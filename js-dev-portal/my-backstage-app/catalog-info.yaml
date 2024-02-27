@@ -11,3 +11,18 @@ spec:
   type: website
   owner: john@example.com
   lifecycle: experimental
+
+# ---
+# apiVersion: backstage.io/v1alpha1
+# kind: Component
+# metadata:
+#     name: project-info
+#     # ...
+#     annotations:
+#         gitlab.com/project-id: '34741644' #1234. This must be in quotes and can be found under Settings --> General
+#         # or
+#         #gitlab.com/project-slug: 'u658/myproject' # group_name/project_name
+# spec:
+#     type: service
+#     owner: john@example.com
+#     lifecycle: experimental

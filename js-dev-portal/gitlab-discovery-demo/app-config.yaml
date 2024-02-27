@@ -45,6 +45,7 @@ integrations:
   gitlab:
     - host: gitlab.com
       token: ${GITLAB_TOKEN}
+  
 
 proxy:
   ### Example for how to add a proxy endpoint for the frontend.
@@ -95,8 +96,8 @@ catalog:
       rules:
         - allow: [User, Group]
 
-    # - type: gitlab-discovery
-    #   target: https://gitlab.com/security142/iac-scanning/blob/main/catalog-info.yaml
+    - type: gitlab-discovery
+      target: https://gitlab.com/security142/blob/main/catalog-info.yaml
 
     ## Uncomment these lines to add more example data
     # - type: url
@@ -107,32 +108,18 @@ catalog:
     #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
     #   rules:
     #     - allow: [User, Group]
-  providers:
-    gitlab:
-      yourProviderId:
-        host: gitlab.com # Identifies one of the hosts set up in the integrations
-        #branch: main # Optional. Used to discover on a specific branch
-        #fallbackBranch: main # Optional. Fallback to be used if there is no default branch configured at the Gitlab repository. It is only used, if `branch` is undefined. Uses `master` as default
-        #skipForkedRepos: false # Optional. If the project is a fork, skip repository
-        group: security142 # Optional. Group and subgroup (if needed) to look for repositories. If not present the whole instance will be scanned
-        entityFilename: catalog-info.yaml # Optional. Defaults to `catalog-info.yaml`
-        #projectPattern: '[\s\S]*' # Optional. Filters found projects based on provided patter. Defaults to `[\s\S]*`, which means to not filter anything
-        schedule: # optional; same options as in TaskScheduleDefinition
-          # supports cron, ISO duration, "human duration" as used in code
-          frequency: { minutes: 30 }
-          # supports ISO duration, "human duration" as used in code
-          timeout: { minutes: 3 }
-  
-    # github:
-    #     # the provider ID can be any camelCase string
-    #     providerId:
-    #       organization: 'backstage' # string
-    #       catalogPath: '/catalog-info.yaml' # string
-    #       filters:
-    #         branch: 'main' # string
-    #         repository: '.*' # Regex
-    #       schedule: # optional; same options as in TaskScheduleDefinition
-    #         # supports cron, ISO duration, "human duration" as used in code
-    #         frequency: { minutes: 30 }
-    #         # supports ISO duration, "human duration" as used in code
-    #         timeout: { minutes: 3 }
+  # providers:
+  #   gitlab:
+  #     yourProviderId:
+  #       host: gitlab.com # Identifies one of the hosts set up in the integrations
+  #       #branch: main # Optional. Used to discover on a specific branch
+  #       #fallbackBranch: main # Optional. Fallback to be used if there is no default branch configured at the Gitlab repository. It is only used, if `branch` is undefined. Uses `master` as default
+  #       #skipForkedRepos: false # Optional. If the project is a fork, skip repository
+  #       group: security142 # Optional. Group and subgroup (if needed) to look for repositories. If not present the whole instance will be scanned
+  #       entityFilename: catalog-info.yaml # Optional. Defaults to `catalog-info.yaml`
+  #       #projectPattern: '[\s\S]*' # Optional. Filters found projects based on provided patter. Defaults to `[\s\S]*`, which means to not filter anything
+  #       schedule: # optional; same options as in TaskScheduleDefinition
+  #         # supports cron, ISO duration, "human duration" as used in code
+  #         frequency: { minutes: 30 }
+  #         # supports ISO duration, "human duration" as used in code
+  #         timeout: { minutes: 3 }

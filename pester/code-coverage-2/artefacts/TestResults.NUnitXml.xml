@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="4" errors="0" failures="4" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2024-02-06" time="15:16:36">
+  <environment nunit-version="2.5.8.0" cwd="E:\cloud_devops_local\github-devops-repo\pester\code-coverage" user-domain="LAPTOP-18SOR97C" clr-version="7.0.15" user="udayk" machine-name="LAPTOP-18SOR97C" platform="Microsoft Windows 10 Pro|C:\WINDOWS|\Device\Harddisk0\Partition3" os-version="10.0.19045" />
+  <culture-info current-culture="en-US" current-uiculture="en-US" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Failure" success="False" time="0.6922" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="E:\cloud_devops_local\github-devops-repo\pester\code-coverage\tests\CoverageTest.Tests.ps1" executed="True" result="Failure" success="False" time="0.369" asserts="0" description="E:\cloud_devops_local\github-devops-repo\pester\code-coverage\tests\CoverageTest.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Demonstrating Code Coverage" executed="True" result="Failure" success="False" time="0.3097" asserts="0" description="Demonstrating Code Coverage">
+            <results>
+              <test-case description="Calls FunctionOne with no switch parameter set" name="Demonstrating Code Coverage.Calls FunctionOne with no switch parameter set" time="0.1409" asserts="0" success="False" result="Failure" executed="True">
+                <failure>
+                  <message>CommandNotFoundException: The term 'FunctionOne' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.</message>
+                  <stack-trace>at &lt;ScriptBlock&gt;, E:\cloud_devops_local\github-devops-repo\pester\code-coverage\tests\CoverageTest.Tests.ps1:7</stack-trace>
+                </failure>
+              </test-case>
+              <test-case description="Calls FunctionTwo" name="Demonstrating Code Coverage.Calls FunctionTwo" time="0.1636" asserts="0" success="False" result="Failure" executed="True">
+                <failure>
+                  <message>CommandNotFoundException: The term 'FunctionTwo' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.</message>
+                  <stack-trace>at &lt;ScriptBlock&gt;, E:\cloud_devops_local\github-devops-repo\pester\code-coverage\tests\CoverageTest.Tests.ps1:11</stack-trace>
+                </failure>
+              </test-case>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+      <test-suite type="TestFixture" name="E:\cloud_devops_local\github-devops-repo\pester\code-coverage\tests\CoverageTest2.Tests.ps1" executed="True" result="Failure" success="False" time="0.3232" asserts="0" description="E:\cloud_devops_local\github-devops-repo\pester\code-coverage\tests\CoverageTest2.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="Demonstrating Code Coverage" executed="True" result="Failure" success="False" time="0.2785" asserts="0" description="Demonstrating Code Coverage">
+            <results>
+              <test-case description="Calls FunctionOne with no switch parameter set" name="Demonstrating Code Coverage.Calls FunctionOne with no switch parameter set" time="0.1424" asserts="0" success="False" result="Failure" executed="True">
+                <failure>
+                  <message>CommandNotFoundException: The term 'FunctionOne' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.</message>
+                  <stack-trace>at &lt;ScriptBlock&gt;, E:\cloud_devops_local\github-devops-repo\pester\code-coverage\tests\CoverageTest2.Tests.ps1:7</stack-trace>
+                </failure>
+              </test-case>
+              <test-case description="Calls FunctionTwo" name="Demonstrating Code Coverage.Calls FunctionTwo" time="0.1298" asserts="0" success="False" result="Failure" executed="True">
+                <failure>
+                  <message>CommandNotFoundException: The term 'FunctionTwo' is not recognized as a name of a cmdlet, function, script file, or executable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.</message>
+                  <stack-trace>at &lt;ScriptBlock&gt;, E:\cloud_devops_local\github-devops-repo\pester\code-coverage\tests\CoverageTest2.Tests.ps1:11</stack-trace>
+                </failure>
+              </test-case>
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>
