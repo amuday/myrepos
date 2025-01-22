@@ -1,0 +1,26 @@
+- name: Setup Nginx
+  hosts: all
+  become: True
+  become_method: sudo
+  gather_facts: no
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  tasks:
+    - name: Update all packages to their latest version
+      apt:
+        name: "*"
+        state: latest
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+    - name: Make sure 'nginx' is started
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+      register: result
+    - name: Show result
+      debug:
+        msg: "{{ result }}"
