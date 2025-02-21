@@ -1,0 +1,3 @@
+{
+    "commandToExecute": ["./app-scripts/nginx.sh"]
+  }

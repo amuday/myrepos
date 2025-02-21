@@ -1,9 +1,0 @@
-- name: install nginx on hosts
-  hosts: webservers
-  become: True
-  tasks:
-    - name: install
-      yum: name=nginx state=present
-
-    - name: start service
-      service: name=nginx state=started

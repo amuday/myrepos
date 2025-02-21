@@ -1,8 +1,0 @@
-host1 ansible_host=192.168.10.4
-host2 ansible_host=192.168.10.5
-
-[webservers]
-host1
-
-[dbservers]
-host2

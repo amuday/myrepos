@@ -35,7 +35,7 @@ output "myserver_1" {
 
 # myserver_names = [ "server1",  "server2",]
 output "myserver_names" {
-  value = [ for val in var.servers : val.name ]
+  value = [for val in var.servers : val.name]
 }
 
 /*
@@ -49,12 +49,12 @@ myserver_tags = {
     "staging",              
   ])                        
 }
-*/                           
+*/
 output "myserver_tags" {
   value = { for val in var.servers : val.name => val.tags }
 }
 
-output "capacity_reservation_preference"{
+output "capacity_reservation_preference" {
   value = var.ec2_instances.one.capacity_reservation_specification[*].capacity_reservation_preference
 
   # var.ec2_instances is object with 3 attributes error for below one
@@ -70,5 +70,15 @@ output "paths" {
 
 output "meta_info" {
   value = [terraform.workspace]
-  
+}
+
+output "containers" {
+  value = var.containers.container1.context
+}
+
+output "containers_1" {
+  value = {
+    for cnxt in var.containers: cnxt => (cnxt = context.context)
+    
+    }
 }
