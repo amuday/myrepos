@@ -1,0 +1,6 @@
+# This ID must be unique across the cluster
+jira.node.id = {{ ansible_default_ipv4.address }}-{{ (ansible_default_ipv4.macaddress | hash('md5'))[:8] }}
+# The location of the shared home directory for all JIRA nodes
+jira.shared.home = {{ app_shared_home_dir }}
+# Define ehcache hostname explicitly
+ehcache.listener.hostName = ip-{{ ansible_eth0.ipv4.address | replace('.','-') }}

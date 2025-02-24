@@ -1,0 +1,218 @@
+image:
+  name: registry.dx1.lseg.com/app/app-51310/azure/cicd/gitlab/template/build-scan-push-container-images/ansible-collections:v1.4
+
+before_script:
+  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}".insteadOf "https://${CI_SERVER_HOST}"
+
+include:
+  - project: "ci/stable/security/vault/vault-integrator"
+    ref: "4.1.1" # Make sure to use the latest tag
+    file:
+      - "templates/vault-integrator.yml"
+
+variables:
+  ENVIRONMENT:
+    value: "qa"
+    options: ["qa", "ppr", "ppr2", "ppr3", "ppr4", "ppr5", "ppr6", "ppr7", "prd", "dr"]
+    description: "Select your environment"
+  CREATE_IMAGE:
+    value: "false"
+    options: ["false", "true"]
+    description: "Select your need"
+  APP_VERSION:
+    value: "9.4.9"
+    options: ["9.12.15", "9.12.14", "9.4.9", "9.4.15", "9.4.6"]
+    description: "Select Application Version"
+  APP_NAME: "jira"
+  RUNNER_TAG: ""
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'push'
+      when: never
+    - if: '$ENVIRONMENT == "qa"'
+      variables:
+        RUNNER_TAG: "atlappstest"
+        APP_DOMAIN: "${APP_NAME}.qa.refinitiv.com"
+    - if: '$ENVIRONMENT == "ppr"'
+      variables:
+        RUNNER_TAG: "atlappsppr"
+        APP_DOMAIN: "${APP_NAME}-azure.ppe.refinitiv.com"
+    - if: '$ENVIRONMENT == "ppr2"'
+      variables:
+        RUNNER_TAG: "atlappsppr"
+        APP_DOMAIN: "${APP_NAME}2-azure.ppe.refinitiv.com"
+    - if: '$ENVIRONMENT == "ppr3"'
+      variables:
+        RUNNER_TAG: "atlappsppr"
+        APP_DOMAIN: "${APP_NAME}3-azure.ppe.refinitiv.com"
+    - if: '$ENVIRONMENT == "ppr4"'
+      variables:
+        RUNNER_TAG: "atlappsppr"
+        APP_DOMAIN: "${APP_NAME}4-azure.ppe.refinitiv.com"
+    - if: '$ENVIRONMENT == "ppr5"'
+      variables:
+        RUNNER_TAG: "atlappsppr"
+        APP_DOMAIN: "${APP_NAME}5-azure.ppe.refinitiv.com"   
+    - if: '$ENVIRONMENT == "ppr6"'
+      variables:
+        RUNNER_TAG: "atlappsppr"
+        APP_DOMAIN: "${APP_NAME}6-azure.ppe.refinitiv.com"  
+    - if: '$ENVIRONMENT == "ppr7"'
+      variables:
+        RUNNER_TAG: "atlappsppr"
+        APP_DOMAIN: "${APP_NAME}7-azure.ppe.refinitiv.com"       
+    - if: "$ENVIRONMENT == 'prd' || $ENVIRONMENT == 'dr'"
+      variables:
+        RUNNER_TAG: "atlappsprd"
+        APP_DOMAIN: "${APP_NAME}.refinitiv.com"
+    - when: always
+    
+
+default:
+  tags: ["$RUNNER_TAG"]
+
+stages:
+  - env-mapping
+  - azure-auth-lmp
+  - vault-apps-vars
+  - create-image
+
+01-env-mapping:
+  stage: env-mapping
+  tags:
+    - LSEG
+  script:
+    - |
+      echo "ENVIRONMENT=$ENVIRONMENT"
+      if [ "$ENVIRONMENT" == "prd" ] || [ "$ENVIRONMENT" == "dr" ]; then
+        source "env/prd.env"
+      else
+        source "env/$ENVIRONMENT.env"
+      fi
+      echo "AZURE_ACCOUNT=$AZURE_ACCOUNT" > "${CI_PIPELINE_ID}-${CI_JOB_NAME}env-${CI_JOB_ID}.env"
+      echo "AZURE_RESOURCE_GROUP=$AZURE_RESOURCE_GROUP" >> "${CI_PIPELINE_ID}-${CI_JOB_NAME}env-${CI_JOB_ID}.env"
+      echo "VAULT_ADDR=$VAULT_ADDR" >> "${CI_PIPELINE_ID}-${CI_JOB_NAME}env-${CI_JOB_ID}.env"
+      echo "Runner tag for $ENVIRONMENT == $RUNNER_TAG"
+      if [ "$ENVIRONMENT" == "qa" ]; then
+        echo "LSEG_PPE_VAULT=$LSEG_PPE_VAULT" >> "${CI_PIPELINE_ID}-${CI_JOB_NAME}env-${CI_JOB_ID}.env"
+      elif [ "$ENVIRONMENT" == "ppr" ] || [ "$ENVIRONMENT" == "ppr2" ] || [ "$ENVIRONMENT" == "ppr3" ] || [ "$ENVIRONMENT" == "ppr4" ] || [ "$ENVIRONMENT" == "ppr5" ] || [ "$ENVIRONMENT" == "ppr6" ] || [ "$ENVIRONMENT" == "ppr7" ]; then
+        echo "LSEG_PPE_VAULT=$LSEG_PPE_VAULT" >> "${CI_PIPELINE_ID}-${CI_JOB_NAME}env-${CI_JOB_ID}.env"
+      else
+        echo "LSEG_PROD_VAULT=$LSEG_PROD_VAULT" >> "${CI_PIPELINE_ID}-${CI_JOB_NAME}env-${CI_JOB_ID}.env"
+      fi
+
+  artifacts:
+    reports:
+      dotenv: "${CI_PIPELINE_ID}-${CI_JOB_NAME}env-${CI_JOB_ID}.env"
+  
+02-azure-dynamic-secrets:
+  stage: azure-auth-lmp
+  extends: [.vault-artifact-decrypter, .vault-azure-auth]
+  tags:
+    - LSEG
+  dependencies: [01-env-mapping]
+
+03-vault-static-secrets:
+  stage: vault-apps-vars
+  extends: [.vault-artifact-decrypter]
+  image: registry.dx1.lseg.com/ci/stable/docker-images/image-library/stable/lseg-vault-ci:1.12-0b5a5dd5
+  tags:
+    - LSEG
+  id_tokens:
+    VAULT_ID_TOKEN:
+      aud: ${CI_SERVER_URL}
+
+  before_script:
+    - echo "Fetch static secrets"
+  script:
+    - |
+      if [[ "$ENVIRONMENT" == "qa" || "$ENVIRONMENT" == "ppr" || "$ENVIRONMENT" == "ppr2" || "$ENVIRONMENT" == "ppr3" || "$ENVIRONMENT" == "ppr4" || "$ENVIRONMENT" == "ppr5" || "$ENVIRONMENT" == "ppr6" || "$ENVIRONMENT" == "ppr7"  ]]; then
+        export VAULT_ADDR="https://vaultent.ppe.lseg.com"
+      elif [[ "$ENVIRONMENT" == "prd" || "$ENVIRONMENT" == "dr" ]]; then
+        export VAULT_ADDR="https://vault.lseg.com"
+      else
+        echo "No matching vault address found."
+      fi
+    - export VAULT_TOKEN="$(vault write -field=token auth/dx1_gitlab_jwt/login role=app-51337-developer jwt=${VAULT_ID_TOKEN})"
+    - export CREDS=$(vault kv get -namespace=azure -format=json -mount="gitlab/app-51337/kv" ${APP_NAME}-$ENVIRONMENT)
+    - |
+      for key in $(echo $CREDS | jq -r '.data.data | keys | .[]'); do
+        value=$(echo $CREDS | jq -r .data.data.${key})
+        echo "${key}=${value}" >> "${CI_PIPELINE_ID}-${CI_JOB_NAME}-${CI_JOB_ID}.env"
+      done
+    - export CREDS_SSL=$(vault kv get -namespace=azure -format=json -mount="gitlab/app-51337/kv" ${APP_NAME}-ssl-$ENVIRONMENT)
+    - |
+      for key in $(echo $CREDS_SSL | jq -r '.data.data | keys | .[]'); do
+        value=$(echo $CREDS_SSL | jq -r .data.data.${key})
+        echo "${key}=${value}" >> "${CI_PIPELINE_ID}-${CI_JOB_NAME}ssl-${CI_JOB_ID}.env"
+      done
+    - ls -l *.env
+  artifacts:
+    paths:
+      - "${CI_PIPELINE_ID}-${CI_JOB_NAME}-${CI_JOB_ID}.env"
+      - "${CI_PIPELINE_ID}-${CI_JOB_NAME}ssl-${CI_JOB_ID}.env"
+
+04-create_image_job:
+  stage: create-image
+  extends: [.vault-artifact-decrypter]
+  image:
+    name: registry.dx1.lseg.com/app/app-51310/azure/prdsvc/terraform/azure-prdsvc-terraform-pipelines/packer:latest
+  script:
+    - az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant $ARM_TENANT_ID
+    - az account set --subscription $ARM_SUBSCRIPTION_ID
+    - export client_secret="$ARM_CLIENT_SECRET"
+    - export client_id="$ARM_CLIENT_ID"
+    - export tenant_id="$ARM_TENANT_ID"
+    - export subscription_id="$ARM_SUBSCRIPTION_ID"
+    - export APP_DOMAIN="$APP_DOMAIN"
+    - export APP_VERSION="$APP_VERSION"
+    - export APP_NAME="$APP_NAME"
+    #- export PACKER_LOG=1
+    - |
+      if [[ "$ENVIRONMENT" == "qa" ]]; then
+        sed -i "s/client_secret *= *\"\"/client_secret = \"$client_secret\"/" pkrvariables/qavariables.pkrvars.hcl
+        packer init config.pkr.hcl
+        packer build -var "appname=${APP_NAME}" -var "env=${ENVIRONMENT}" -var-file=pkrvariables/qavariables.pkrvars.hcl  -var-file=pkrvariables/default.pkrvars.hcl -force main.pkr.hcl
+      elif [[ "$ENVIRONMENT" == "ppr" ]]; then
+        sed -i "s/client_secret *= *\"\"/client_secret = \"$client_secret\"/" pkrvariables/pprvariables.pkrvars.hcl
+        packer init config.pkr.hcl
+        packer build -var "appname=${APP_NAME}" -var "env=${ENVIRONMENT}" -var-file=pkrvariables/pprvariables.pkrvars.hcl  -var-file=pkrvariables/default.pkrvars.hcl -force main.pkr.hcl
+      elif [[ "$ENVIRONMENT" == "ppr2" ]]; then
+        sed -i "s/client_secret *= *\"\"/client_secret = \"$client_secret\"/" pkrvariables/ppr2variables.pkrvars.hcl
+        packer init config.pkr.hcl
+        packer build -var "appname=${APP_NAME}" -var "env=${ENVIRONMENT}" -var-file=pkrvariables/ppr2variables.pkrvars.hcl  -var-file=pkrvariables/default.pkrvars.hcl -force main.pkr.hcl
+      elif [[ "$ENVIRONMENT" == "ppr3" ]]; then
+        sed -i "s/client_secret *= *\"\"/client_secret = \"$client_secret\"/" pkrvariables/ppr3variables.pkrvars.hcl
+        packer init config.pkr.hcl
+        packer build -var "appname=${APP_NAME}" -var "env=${ENVIRONMENT}" -var-file=pkrvariables/ppr3variables.pkrvars.hcl  -var-file=pkrvariables/default.pkrvars.hcl -force main.pkr.hcl
+      elif [[ "$ENVIRONMENT" == "ppr4" ]]; then
+        sed -i "s/client_secret *= *\"\"/client_secret = \"$client_secret\"/" pkrvariables/ppr4variables.pkrvars.hcl
+        packer init config.pkr.hcl
+        packer build -var "appname=${APP_NAME}" -var "env=${ENVIRONMENT}" -var-file=pkrvariables/ppr4variables.pkrvars.hcl  -var-file=pkrvariables/default.pkrvars.hcl -force main.pkr.hcl
+      elif [[ "$ENVIRONMENT" == "ppr5" ]]; then
+        sed -i "s/client_secret *= *\"\"/client_secret = \"$client_secret\"/" pkrvariables/ppr5variables.pkrvars.hcl
+        packer init config.pkr.hcl
+        packer build -var "appname=${APP_NAME}" -var "env=${ENVIRONMENT}" -var-file=pkrvariables/ppr5variables.pkrvars.hcl  -var-file=pkrvariables/default.pkrvars.hcl -force main.pkr.hcl
+      elif [[ "$ENVIRONMENT" == "ppr6" ]]; then
+        sed -i "s/client_secret *= *\"\"/client_secret = \"$client_secret\"/" pkrvariables/ppr6variables.pkrvars.hcl
+        packer init config.pkr.hcl
+        packer build -var "appname=${APP_NAME}" -var "env=${ENVIRONMENT}" -var-file=pkrvariables/ppr6variables.pkrvars.hcl  -var-file=pkrvariables/default.pkrvars.hcl -force main.pkr.hcl        
+      elif [[ "$ENVIRONMENT" == "ppr7" ]]; then
+        sed -i "s/client_secret *= *\"\"/client_secret = \"$client_secret\"/" pkrvariables/ppr7variables.pkrvars.hcl
+        packer init config.pkr.hcl
+        packer build -var "appname=${APP_NAME}" -var "env=${ENVIRONMENT}" -var-file=pkrvariables/ppr7variables.pkrvars.hcl  -var-file=pkrvariables/default.pkrvars.hcl -force main.pkr.hcl                
+      elif [[ "$ENVIRONMENT" == "prd" || "$ENVIRONMENT" == "dr" ]]; then
+        sed -i "s/client_secret *= *\"\"/client_secret = \"$client_secret\"/" pkrvariables/prdvariables.pkrvars.hcl
+        packer init config.pkr.hcl
+        packer build -var "appname=${APP_NAME}" -var "env=${ENVIRONMENT}" -var-file=pkrvariables/prdvariables.pkrvars.hcl  -var-file=pkrvariables/default.pkrvars.hcl -force main.pkr.hcl
+      else
+        echo "No matching environment for Packer build."
+      fi
+  needs: [01-env-mapping, 02-azure-dynamic-secrets, 03-vault-static-secrets]
+  dependencies: [01-env-mapping, 02-azure-dynamic-secrets, 03-vault-static-secrets]
+  rules:
+    - if: '$CREATE_IMAGE == "true"'
+      when: on_success
+  tags:
+    - "$RUNNER_TAG"

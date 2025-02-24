@@ -1,0 +1,5 @@
+#!/bin/bash
+
+FILE=/etc/datadog-agent/instance-id
+echo "lseg-{{appname}}-{{env}}-${HOSTNAME: -3}" > $FILE
+chmod 755 $FILE

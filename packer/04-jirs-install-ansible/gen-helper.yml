@@ -1,0 +1,103 @@
+---
+- hosts: localhost
+  gather_facts: true
+  become: true
+
+  vars:
+    appslot: app0 #Important - change app0 or app1
+
+  vars_files:
+    - "vars/{{ appslot }}.yml"
+
+  tasks:
+    - name: get Current working dirctory
+      shell: pwd
+      register: current_dir_output
+
+    - name: Find .env files
+      find:
+        paths: "{{ current_dir_output.stdout }}"
+        patterns: "*vault-static-secrets-*.env"
+      register: env_files
+
+    - name: env_file var
+      set_fact:
+        env_file_path: "{{ env_files.files | map(attribute='path') | list }}"
+
+    - name: Read the content of .env files and set facts
+      set_fact:
+        env_content: "{{ lookup('file', item)| default('') }}"
+      no_log: true
+      loop: "{{ env_file_path }}"
+
+    - name: set facts for variables
+      set_fact:
+        "{{ item.split('=',1)[0] }}": "{{ item.split('=',1)[1] }}"
+      ignore_errors: true
+      no_log: true
+      loop: "{{ env_content | default('') | split('\n') }}"
+      when:
+        - "item != '' and '=' in item and not item.startswith('ANSIBLE_USER_PRIVATE_KEY=') and 'ANSIBLE_USER_PRIVATE_KEY' not in item.split('=')[0]"
+      register: vault_vars
+
+    - name: Debug for vars set before
+      debug:
+        msg: "{{ vault_vars.results | selectattr('ansible_facts.APP_DB_HOST', 'defined') | map(attribute='ansible_facts.APP_DB_HOST') | first }}"
+
+    - name: Find SSL .env files 
+      find:
+        paths: "{{ current_dir_output.stdout }}"
+        patterns: "*vault-static-secretsssl-*.env"
+      register: ssl_env_files
+
+    - name: ssl_env_file var
+      set_fact:
+        ssl_env_file_path: "{{ ssl_env_files.files | map(attribute='path') | list }}"
+
+    - name: Read the content of ssl .env files and set facts
+      set_fact:
+        ssl_env_content: "{{ lookup('file', item)| default('') }}"
+      no_log: true
+      loop: "{{ ssl_env_file_path }}"
+
+    - name: remove SSL_CERT= prefix
+      set_fact:
+         ssl_env: "{{ ssl_env_content | regex_replace('^SSL_CERT=', '') }}"
+      no_log: true
+
+    - name: Extract content for SSL 
+      set_fact:
+        SSL_PEM: "{{ ssl_env }}"
+      no_log: true
+
+    - name: create a file with SSL variable
+      copy:
+        content: |
+          {{ SSL_PEM.strip() }}
+        dest: "{{ current_dir_output.stdout  }}/roles/elasity-proxy/templates/tls/main.pem.j2"
+        mode: '0400'
+      no_log: true
+
+    - name: Set required facts from OS related to App
+      set_fact:
+        appname: "{{ lookup('env', 'APP_NAME') }}"
+        app_version: "{{ lookup('env', 'APP_VERSION') }}"
+        app_restart: false
+
+    - name: Generate runtime var from template
+      template:
+        src: "vars/runtime-default.yml.j2"
+        dest: "vars/runtime-default.yml"
+      vars:
+        APP_STORAGE_ACCOUNT_NAME: "{{ vault_vars.results | selectattr('ansible_facts.STORAGE_ACCOUNT_NAME', 'defined') | map(attribute='ansible_facts.STORAGE_ACCOUNT_NAME') | first }}"
+        APP_STORAGE_ACCOUNT_KEY: "{{ vault_vars.results | selectattr('ansible_facts.STORAGE_ACCOUNT_KEY', 'defined') | map(attribute='ansible_facts.STORAGE_ACCOUNT_KEY') | first }}"
+        APP_FILE_SHARE_NAME: "{{ vault_vars.results | selectattr('ansible_facts.FILE_SHARE_NAME', 'defined') | map(attribute='ansible_facts.FILE_SHARE_NAME') | first }}"
+        DB_EAZYBI_PASS: "{{ vault_vars.results | selectattr('ansible_facts.APP_DB_EAZYBI_PASS', 'defined') | map(attribute='ansible_facts.APP_DB_EAZYBI_PASS') | first }}"
+        DB_HOST: "{{ vault_vars.results | selectattr('ansible_facts.APP_DB_HOST', 'defined') | map(attribute='ansible_facts.APP_DB_HOST') | first }}"
+        DB_ADMIN_USER: "{{ vault_vars.results | selectattr('ansible_facts.APP_DB_ADMIN_USER', 'defined') | map(attribute='ansible_facts.APP_DB_ADMIN_USER') | first }}"
+        DB_ADMIN_PASS: "{{ vault_vars.results | selectattr('ansible_facts.APP_DB_ADMIN_PASS', 'defined') | map(attribute='ansible_facts.APP_DB_ADMIN_PASS') | first }}"
+        DB_PASS: "{{ vault_vars.results | selectattr('ansible_facts.APP_DB_PASS', 'defined') | map(attribute='ansible_facts.APP_DB_PASS') | first }}"
+        SERVER_ID:  "{{ vault_vars.results | selectattr('ansible_facts.SERVER_ID', 'defined') | map(attribute='ansible_facts.SERVER_ID') | first }}"
+        LICENSE_KEY:  "{{ vault_vars.results | selectattr('ansible_facts.LICENSE_KEY', 'defined') | map(attribute='ansible_facts.LICENSE_KEY') | first }}"
+        DD_API_KEY: "{{ vault_vars.results | selectattr('ansible_facts.DD_API_KEY', 'defined') | map(attribute='ansible_facts.DD_API_KEY') | first }}"
+        JMX_AUTH_KEY: "{{ vault_vars.results | selectattr('ansible_facts.JMX_AUTH_KEY', 'defined') | map(attribute='ansible_facts.JMX_AUTH_KEY') | first }}"

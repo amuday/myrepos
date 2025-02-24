@@ -1,0 +1,70 @@
+---
+
+- name: Install datadog Hostname script
+  template:
+    src: "set-datadog-hostname-file.sh.j2"
+    dest: "/etc/datadog-agent/set-datadog-hostname-file.sh"
+    mode: 0755
+
+- name: Create a job that sets the host on boot
+  ansible.builtin.cron:
+    name: "Generate Hostname file for Datadog usage"
+    special_time: "reboot"
+    job: "/etc/datadog-agent/set-datadog-hostname-file.sh"
+
+- name: Backup the existing config file
+  copy:
+    src: "{{ datadog_config_filepath }}"
+    dest: "{{ datadog_config_filepath }}_bk_manual"
+    remote_src: true
+
+- name: Read the existing datadog configuration
+  slurp:
+    path: "{{ datadog_config_filepath }}"
+  register: raw_datadog_config
+
+- name: Extract the data as yaml
+  set_fact:
+    original_datadog_yaml: "{{ raw_datadog_config['content'] | b64decode | from_yaml }}"
+
+- name: Patch the yaml with changes
+  set_fact:
+    new_datadog_yaml: "{{ original_datadog_yaml | combine(newdata, recursive=True) }}"
+  vars:
+    newdata:
+      site: datadoghq.eu
+      api_key: "{{ datadog_api_key }}"
+      hostname_file: /etc/datadog-agent/instance-id
+      logs_enabled: true
+      tags:
+        - "appName:{{ appname }}"
+        - "environment:{{ env }}"
+
+- name: Write out the new config as yaml
+  copy:
+    content: "{{ new_datadog_yaml | to_nice_yaml(indent=4, sort_keys=False) }}"
+    dest: "{{ datadog_config_filepath }}"
+
+- name: Ensure conf directories exist
+  file:
+    path: "/etc/{{ item | dirname }}"
+    state: directory
+    owner: dd-agent
+    group: dd-agent
+  loop: "{{ config_template_files }}"
+
+- name: put systemd config file
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/{{ item }}"
+    owner: dd-agent
+    group: dd-agent
+  loop: "{{ config_template_files }}"
+  notify: restart datadog-agent
+
+# This permission is necessary for the dd-agent to access the logs
+- name: Add Datadog user to the app group
+  user: 
+    name: 'dd-agent'
+    groups: '{{ appname }}'
+    append: yes

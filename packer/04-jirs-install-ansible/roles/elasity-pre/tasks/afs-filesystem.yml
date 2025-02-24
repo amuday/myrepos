@@ -1,0 +1,27 @@
+---
+- name: create share folders for app {{ appname }}
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ app_shared_dir }}"
+
+- name: Install cifs-utils for Azure file share
+  apt:
+    name: cifs-utils
+    state: present
+
+- name: Create Azure Files share credentail file
+  template:
+    src: smbcredentails.j2
+    dest: /etc/smbcredentails
+    mode: '0600'
+
+- name: Mount Azure Files share
+  mount:
+    fstype: cifs
+    src: "//{{ az_storage_account_name }}.file.core.windows.net/{{ az_file_share_name }}"
+    path: "{{ app_shared_dir }}"
+    opts: "credentials=/etc/smbcredentails,uid={{ app_user }},gid={{ app_group }},dir_mode=0775,file_mode=0755,serverino,nosharesock,actimeo=30"
+    state: mounted
+    backup: true

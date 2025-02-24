@@ -1,0 +1,35 @@
+logs:
+  - type: file
+    path: "{{ app_install_dir }}/logs/catalina.out"
+    service: "{{ appname }}"
+    source: "tomcat"
+
+  - type: file
+    path: "{{ app_home_dir }}/log/atlassian-{{ appname }}.log"
+    service: "{{ appname }}"
+    source: "{{ appname }}"
+
+  - type: file
+    path: "{{ app_home_dir }}/log/atlassian-{{ appname }}-sql.log"
+    service: "{{ appname }}"
+    source: "{{ appname }}-sql"
+
+  - type: file
+    path: "{{ app_home_dir }}/log/atlassian-{{ appname }}-app-monitoring.log"
+    service: "{{ appname }}"
+    source: "{{ appname }}-app-monitoring"
+
+  - type: file
+    path: "{{ app_home_dir }}/log/atlassian-{{ appname }}-security.log"
+    service: "{{ appname }}"
+    source: "{{ appname }}-security"
+
+  - type: file
+    path: "{{ app_home_dir }}/log/atlassian-{{ appname }}-migration.log"
+    service: "{{ appname }}"
+    source: "{{ appname }}-migration"
+
+  - type: file
+    path: "{{ app_home_dir }}/log/{{ appname }}-diagnostics.log"
+    service: "{{ appname }}"
+    source: "{{ appname }}-diagnostics"

@@ -1,0 +1,307 @@
+- name: install os packages
+  include_tasks: pre-install.yml
+
+- name: config postgres database for {{ appname }}
+  include_tasks: "{{ role_path }}/../elasity-pre/tasks/database.yml"
+  when: rds_engine_type|lower is search('postgres') 
+
+- name: config mysql database for {{ appname }}
+  include_tasks: "{{ role_path }}/../elasity-pre/tasks/database-mysql.yml"
+  when: rds_engine_type|lower is search('mysql') 
+
+- name: mount Azure File share for {{ appname }}
+  include_tasks:  "{{ role_path }}/../elasity-pre/tasks/afs-filesystem.yml"
+  when: app_datacenter
+
+- name: check if {{ appname }} installed
+  stat:
+    path: "{{ app_mark_file }}"
+  register: app_mark
+
+- name: download app tarball
+  include_tasks: install-app.yml
+  when: (app_mark.stat.exists == False) or (force_installation|default(false)) or (appphase == 'upgrade')
+
+- name: configure the home folder
+  replace:
+    path: "{{ app_install_dir }}/atlassian-jira/WEB-INF/classes/jira-application.properties"
+    replace: 'jira.home = {{ app_home_dir }}'
+    regexp: '^jira.home.*'
+    backup: true
+
+- name: configure the app user
+  replace:
+    path: "{{ app_install_dir }}/bin/user.sh"
+    replace: 'JIRA_USER="{{ app_user }}"'
+    regexp: '^JIRA_USER=".*'
+    backup: true
+
+- name: install init script on traditional system
+  template:
+    src: "init.j2"
+    dest: "/etc/init.d/{{ appname }}"
+    owner: root
+    group: root
+    mode: 0755
+  when: ansible_service_mgr != 'systemd'
+  tags:
+    - configuration
+#  notify: restart {{ appname }}
+
+- name: remove init script on systemd system
+  file:
+    path: "/etc/init.d/{{ appname }}"
+    state: absent
+  when: ansible_service_mgr == 'systemd'
+  tags:
+    - configuration
+
+- name: install systemd script on systemd system
+  template:
+    src: "systemd.j2"
+    dest: "/lib/systemd/system/{{ appname }}.service"
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_service_mgr == 'systemd'
+  tags:
+    - configuration
+#  notify: restart {{ appname }}
+
+#- fail: msg="STOP STOP STOP"
+
+- name: update config file with https
+  template:
+    src: "{{ conf_server_xml }}"
+    dest: "{{ app_install_dir }}/conf/server.xml"
+    mode: 0644
+    backup: true
+  tags:
+    - configuration
+#  notify: restart {{ appname }}
+
+- name: update min JVM memory
+  replace:
+    path: "{{ app_install_dir }}/bin/setenv.sh"
+    replace: 'JVM_MINIMUM_MEMORY="{{ app_jvm_memory }}"'
+    regexp: '^JVM_MINIMUM_MEMORY="(\w+)"'
+    backup: true
+
+- name: update max JVM memory
+  replace:
+    path: "{{ app_install_dir }}/bin/setenv.sh"
+    replace: 'JVM_MAXIMUM_MEMORY="{{ app_jvm_memory }}"'
+    regexp: '^JVM_MAXIMUM_MEMORY="(\w+)"'
+    backup: true
+
+- name: install JVM memory update file
+  template:
+    src: "jvm-memory.sh.j2"
+    dest: "{{ app_script_dir }}/jvm-memory.sh"
+    mode: 0755
+    backup: false
+
+- name: cron to update JVM memory
+  cron:
+    name: "update jvm memory at boot"
+    special_time: reboot
+    user: root
+    job: "({{ app_script_dir }}/jvm-memory.sh 2>&1 && sleep 60 && /usr/bin/systemctl restart {{ appname }} 2>&1) | logger -p local7.info -t boot-datacenter"
+    cron_file: "{{ appname }}-jvm-memory"
+
+- name: Disable email notification on non-prod
+  replace:
+    path: "{{ app_install_dir }}/bin/setenv.sh"
+    replace: 'DISABLE_NOTIFICATIONS='
+    regexp: '^#DISABLE_NOTIFICATIONS='
+    backup: true
+  when: env != 'prd'
+
+- name: add JVM_EXTRA_ARGS
+  blockinfile:
+    path: "{{ app_install_dir }}/bin/setenv.sh"
+    block: |
+      JVM_EXTRA_ARGS="{{ app_jmx_string }} $JVM_EXTRA_ARGS"
+      #JVM_EXTRA_ARGS="-Datlassian.recovery.password={{ vault_atlassian_recovery_password }} $JVM_EXTRA_ARGS"
+      export UMASK=0022
+      CATALINA_OPTS="-Datlassian.pats.max.tokens.expiry.days=90 -Datlassian.pats.eternal.tokens.enabled=false ${CATALINA_OPTS}"
+    marker: "#{mark} ANSIBLE MANAGED JVM_EXTRA_ARGS"
+    backup: true
+    insertafter: '^JVM_EXTRA_ARGS="-XX'
+
+- name: add JMX monitoring
+  blockinfile:
+    path: "{{ app_install_dir }}/bin/setenv.sh"
+    block: |
+      CATALINA_OPTS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.access.file={{ app_root_dir }}/.jmxaccess -Dcom.sun.management.jmxremote.password.file={{ app_root_dir }}/.jmxcredentials -Dcom.sun.management.jmxremote.port={{ app_jmx_port }} -Dcom.sun.management.jmxremote.local.only=true ${CATALINA_OPTS}"
+      export UMASK=0022
+      ### IMPORTANT - No manual config after this line and before export CATALINA_OPTS
+    marker: "#{mark} ANSIBLE MANAGED MAIN OPTIONS"
+    backup: true
+    insertbefore: '^export CATALINA_OPTS'
+
+- name: install jira-config file 1
+  blockinfile:
+    path: "{{ app_home_dir }}/jira-config.properties"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK 1"
+    block: |
+      jira.websudo.is.disabled = true
+      #ITMPROJ-412
+      jira.lf.date.relativize=false
+      jira.autoexport = false
+      jira.index.issue.threads = {{ [(ansible_processor_vcpus|int * 2 - 2), 20] | max }}
+      #TICKET-16893 for next 3 lines
+      jira.search.views.default.max = 3000
+      jira.search.views.max.limit = 3000
+      jira.search.views.max.unlimited.group = jira-administrators
+      jira.dashboard.max.gadgets = 30
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0640
+    create: true
+    backup: true
+
+- name: install dbconfig file for postgres
+  template:
+    src: "postgres-dbconfig.xml.j2"
+    dest: "{{ app_home_dir }}/dbconfig.xml"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0640
+    backup: true
+  when: rds_engine_type|lower is search('postgres')
+
+- name: install dbconfig file for mysql
+  template:
+    src: "mysql-dbconfig.xml.j2"
+    dest: "{{ app_home_dir }}/dbconfig.xml"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0640
+    backup: true
+  when: rds_engine_type|lower is search('mysql')
+
+- name: copy the jdbc driver file
+  get_url:
+    url: "{{ mysql_jdbc_driver_url }}"
+    dest: "{{ app_install_dir }}/lib/{{ mysql_jdbc_driver_file }}"
+    force: false
+    mode: 0644
+  when: rds_engine_type|lower is search('mysql')
+
+- name: install cluster file
+  template:
+    src: "cluster.properties.j2"
+    dest: "{{ app_home_dir }}/cluster.properties"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0640
+  when: app_datacenter
+
+# - name: sleep after install cluster file to allow manaul review and update until fully automated
+#   pause:
+#     minutes: 2
+
+- name: install cluster update file #NEED
+  template:
+    src: "datacenter.sh.j2"
+    dest: "{{ app_script_dir }}/datacenter.sh"
+    mode: 0755
+    backup: false
+  when: app_datacenter
+
+- name: cron to update cluster.properties at boot
+  cron:
+    name: "cluster autoupdate"
+    special_time: reboot
+    user: root
+    job: "{{ app_script_dir }}/datacenter.sh 2>&1 | logger -p local7.info -t cron-datacenter"
+    cron_file: "{{ appname }}-datacenter"
+  when: app_datacenter
+
+- name: apply customer specical config
+  include_tasks: special-config.yml
+
+# - name: invalidate cloudfront for datacenter during upgrade
+#   include_tasks: cloudfront.yml
+#   when: app_cloudfront_enabled and app_datacenter and appphase is search('upgrade')
+
+- name: control {{ appname }} service
+  service:
+    name: "{{ appname }}"
+    state: "{{ app_final_state }}"
+    enabled: "{{ false if app_datacenter else true }}"
+
+#Below must be after starting service
+- name: install jira-config file 2
+  blockinfile:
+    path: "{{ app_home_dir }}/jira-config.properties"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK 2"
+    block: |
+      upgrade.reindex.allowed = true
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0640
+    create: true
+    backup: true
+
+- name: create folder for log in var
+  file:
+    path: "{{ elasity_log }}"
+    state: directory
+
+- name: create links for {{ appname }} log
+  file:
+    src: "{{ item.s }}"
+    path: "{{ item.p }}"
+    state: link
+    force: yes
+  with_items:
+    - {s: "{{ app_install_dir }}/logs", p: "{{ elasity_log }}/tomcat"}
+    - {s: "{{ app_home_dir }}/log",    p: "{{ elasity_log }}/atlassian"}
+
+- name: logrotate for elasity catalina
+  template:
+    src: elasity.logrotate.j2
+    dest: /etc/logrotate.d/elasity
+
+- name: include support scripts
+  include_tasks: support-scripts.yml
+
+# - name: wait for JVM to come up
+#   wait_for: host=localhost port={{item}} delay=2 sleep=15 timeout=1200 state=started
+#   with_items:
+#     - "{{ app_http_port|default('8080') }}"    #{{ appname }}
+#   tags:
+#     - configuration
+
+- name: alias for application logs
+  lineinfile: 
+    path: ~/.bashrc
+    line: alias dsp_logs='tail -f /var/log/jira/atlassian/atlassian-jira.log /var/log/jira/tomcat/catalina.out'
+
+- name: Change file permissions for Jira Atlassian logs
+  file:
+    path: /var/log/jira/atlassian
+    state: directory
+    recurse: yes
+    mode: o+r
+
+- name: Change file permissions for Jira Tomcatlogs
+  file:
+    path: /var/log/jira/tomcat
+    state: directory
+    recurse: yes
+    mode: o+r
+
+#TICKET-31179
+- name: Change the session timeout to 180 minutes
+  lineinfile:
+    path: "{{ item }}"
+    regexp: '^(.*)<session-timeout>.*</session-timeout>'
+    line: '\1<session-timeout>180</session-timeout>'
+    backrefs: true
+    backup: true
+  loop:
+    - "{{ app_install_dir }}/atlassian-jira/WEB-INF/web.xml"
+    - "{{ app_install_dir }}/conf/web.xml"

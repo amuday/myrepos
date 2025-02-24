@@ -1,0 +1,64 @@
+#Customer specific config
+
+- name: copy sami-git cert to server
+  copy: 
+    src: "{{ item }}"
+    dest: "{{ app_home_dir }}/tmp/{{ item }}.cer"
+  loop:
+    - git.sami.int.thomsonreuters.com
+
+- name: import sami-git cert to a keystore
+  java_cert: 
+    cert_alias: "{{ item }}"
+    cert_path: "{{ app_home_dir }}/tmp/{{ item }}.cer"
+    keystore_path: /usr/lib/jvm/java-11-openjdk-amd64/lib/security/cacerts
+    keystore_pass: changeit
+    keystore_create: false
+    state: present
+  loop:
+    - git.sami.int.thomsonreuters.com
+
+- name: modify urlrewrite.xml
+  blockinfile:
+    path: "{{ app_install_dir }}/atlassian-jira/WEB-INF/urlrewrite.xml"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK URL -->"
+    block: |
+      <rule>
+        <from>/servicedesk/.*\.jsp.*</from>
+        <to type="temporary-redirect">/</to>
+      </rule>
+    insertbefore: '^</urlrewrite>$'
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0644
+    create: false
+    backup: true
+  when: false #NO NEED IN JIRA VERSION 8.5.1, SD 4.5.1
+
+- name: Config eazybi db
+  replace:
+    path: "{{ app_shared_home_dir }}/eazybi.toml"
+    replace: 'host = "{{ my_db.host }}"'
+    regexp: '^host = ".*'
+    backup: true
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    backup: true
+  when: false #DISABLE when no refresh needed
+
+- name: copy root cert to CA dir 
+  copy: 
+    src: "{{ item }}"
+    dest: /usr/local/share/ca-certificates/{{ item }}
+  loop:
+    - lseg-root-ca.crt
+
+- name: update CA certificates
+  command: update-ca-certificates
+
+- name: Add jira private endpoint IPs to hostfile
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ item }}"
+    backup: true
+  with_items: "{{ jira_pe_ips }}"

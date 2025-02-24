@@ -1,0 +1,4 @@
+AZURE_ACCOUNT="a1a-51337-ppr-staging-sub-atlapps-01"
+AZURE_RESOURCE_GROUP="a1a-51341-ppr-rg-jira4-lseg-uks-04"
+LSEG_PPE_VAULT="true"
+VAULT_ADDR="https://vaultent.ppe.com"

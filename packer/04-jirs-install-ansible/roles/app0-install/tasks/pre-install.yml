@@ -1,0 +1,78 @@
+- name: remove app negative packages
+  package:
+    name: "{{ app_excluded_packages }}"
+    state: absent
+
+# - name: enable java 11 in amazon linux extras
+#   shell: amazon-linux-extras enable java-openjdk11 && yum clean metadata && touch /etc/ale-java-openjdk11-enabled
+#   args:
+#     creates: /etc/ale-java-openjdk11-enabled
+
+- name: install app additional packages
+  package:
+    name: "{{ app_included_packages }}"
+    state: present
+
+- name: add app group
+  group:
+    name: "{{ app_group }}"
+    gid: "{{ app_group_id | default(omit) }}"
+    state: present
+
+- name: add app user
+  user:
+    name: "{{ app_user }}"
+    uid: "{{ app_user_id | default(omit) }}"
+    group: "{{ app_group }}"
+    state: present
+
+- name: create folders for app {{ appname }}
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ app_installer_archive_dir }}"
+    - "{{ app_script_dir }}/utils"
+    - "{{ app_base_dir }}"
+    - "{{ app_home_dir }}"
+    - "{{ app_home_dir }}/log"
+    - "{{ app_home_dir }}/tmp"
+
+- name: fix home folder owner for app {{ appname }}
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0755
+  loop:
+    - "{{ app_home_dir }}"
+    - "{{ app_home_dir }}/log"
+    - "{{ app_home_dir }}/tmp"
+
+- name: create folder in shared for app {{ appname }}
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+  loop:
+    - "{{ app_shared_home_dir }}"
+    - "{{ app_shared_heap_dumps_dir }}"
+  when: app_datacenter
+
+- name: Create JMX credential file
+  template:
+    src: jmxcredentials.j2
+    dest: "{{ app_root_dir }}/.jmxcredentials"
+    mode: '0600'
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+
+- name: Create JMX access file
+  template:
+    src: jmxaccess.j2
+    dest: "{{ app_root_dir }}/.jmxaccess"
+    mode: '0600'
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"

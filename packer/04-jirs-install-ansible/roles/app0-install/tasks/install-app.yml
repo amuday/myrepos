@@ -1,0 +1,78 @@
+- name: stop {{ appname }} service
+  service:
+    name: "{{ appname }}"
+    state: stopped
+  failed_when: false
+
+- name: run shell if above service cannot stop app
+  shell: service {{ appname }} stop || true
+
+- name: wait until {{ appname }} service stopped
+  shell: "ps -ef | grep 'catalina.home={{ app_install_dir }}' | grep -v grep | wc -l"
+  retries: 15
+  register: result
+  delay: 10
+  until: result.stdout == "0"
+
+- name: backup shared home folder
+  shell: "{{ app_script_dir }}/datacenter-home-backup.sh"
+  when: app_datacenter and appphase is search('upgrade')
+  run_once: true
+
+- name: install jira-config file 2b
+  blockinfile:
+    path: "{{ app_home_dir }}/jira-config.properties"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK 2"
+    block: |
+      upgrade.reindex.allowed = false
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: 0640
+    create: true
+    backup: true
+  when: appphase is search('upgrade') and app_auto_reindex == 'false'
+
+- name: move old folders
+  shell: "mv -f {{ item }} {{ item }}-$(date +%F-%H-%M)"
+  with_items:
+    - "{{ app_install_dir }}"
+  args:
+    removes: "{{ item }}"
+
+- name: download {{ appname }} archive installer
+  get_url:
+    url: "{{ app_download_url }}"
+    dest: "{{ app_installer_archive_dir }}/{{ app_file_name }}"
+    force: false
+    mode: 0644
+    validate_certs: false
+
+- name: unarchived tarball
+  unarchive:
+    src: "{{ app_installer_archive_dir }}/{{ app_file_name }}"
+    dest: "{{ app_base_dir }}"
+    remote_src: true
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    creates: "{{ app_base_dir }}/{{ app_dir_name }}"
+  register: untar_out
+
+- name: fix owner of new folder
+  shell: chown -R {{ app_user }}:{{ app_group }} {{ app_root_dir }}
+  when: untar_out.changed
+
+- name: create symlink for {{ appname }}
+  file:
+    src: "./{{ app_dir_name }}"
+    dest: "{{ app_install_dir }}"
+    state: link
+
+- name: include task for co-exist jira service desk
+  include_tasks: service-desk.yml
+  when: app_datacenter and (sd_download_url != '')
+  run_once: true
+
+- name: touch a file once all complete
+  file:
+    path: "{{ app_mark_file }}"
+    state: touch

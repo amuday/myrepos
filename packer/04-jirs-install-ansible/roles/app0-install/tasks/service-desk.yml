@@ -1,0 +1,39 @@
+- name: detect jira service desk filename
+  set_fact:
+    sd_filename: "{{ sd_download_url | basename }}"
+
+- name: define folders for source and extracted files 1
+  set_fact:
+    sd_priv_folder: "{{ elasity_common }}/service-desk"
+
+- name: define folders for source and extracted files 2
+  set_fact:
+    sd_src_folder: "{{ sd_priv_folder }}/source"
+    sd_dst_folder: "{{ sd_priv_folder }}/extracted"
+
+- name: create shared folder to store file
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ elasity_common }}"
+    - "{{ sd_priv_folder }}"
+    - "{{ sd_src_folder }}"
+    - "{{ sd_dst_folder }}"
+
+- name: create shell script to install service desk files
+  template:
+    src: service-desk-install.sh.j2
+    dest: "{{ sd_priv_folder }}/service-desk-install.sh"
+    mode: 0700
+
+- name: download service desk source
+  get_url:
+    url: "{{ sd_download_url }}"
+    dest: "{{ sd_src_folder }}/{{ sd_filename }}"
+    force: false
+  register: sd_downloaded_out
+
+- name: run shell script to install service desk files
+  shell: "{{ sd_priv_folder }}/service-desk-install.sh"
+  when: sd_downloaded_out.changed

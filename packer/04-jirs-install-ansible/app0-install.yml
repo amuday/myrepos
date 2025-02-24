@@ -1,0 +1,21 @@
+---
+- hosts: default
+  gather_facts: true
+  become: true
+
+  vars:
+    appslot: app0       #Important - change app0 or app1
+    rds_engine_type: "postgres"
+    app_discover_method: tcp_ip
+    app_edition: datacenter
+    elasity_prefix: elasity
+    app_root_dir: "/{{ elasity_prefix }}-{{ appname }}"
+    ansible_python_interpreter: /usr/bin/python3
+
+  vars_files:
+    - "vars/{{ appslot }}.yml"
+    - "vars/runtime-default.yml"
+    
+  roles:
+    - "{{ appslot }}-install"
+    - "datadog-agent"

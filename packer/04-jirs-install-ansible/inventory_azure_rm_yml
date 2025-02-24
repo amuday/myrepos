@@ -1,0 +1,18 @@
+plugin: azure.azcollection.azure_rm
+auth_source: auto
+include_vm_resource_groups:
+  - 'resource-group'
+
+hostvar_expressions:
+ansible_host: (private_ipv4_addresses) | first
+
+conditional_groups:
+windows: "'windows' in os_profile.system"
+linux: "'linux' in os_profile.system"
+
+keyed_groups:
+ - prefix: app 
+   key: tags.app
+
+exclude_host_filters:
+ - powerstate != 'running'

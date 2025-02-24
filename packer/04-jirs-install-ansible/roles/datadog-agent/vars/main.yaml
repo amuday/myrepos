@@ -1,0 +1,4 @@
+config_template_files:
+  - "{{ 'datadog-agent/conf.d/systemd.d/conf.yaml' if ansible_service_mgr == 'systemd' else 'datadog-agent/conf.d/process.d/conf.yaml' }}"
+  - "datadog-agent/conf.d/jmx.d/conf.yaml"
+  - "datadog-agent/conf.d/jira_logs.d/conf.yaml"
