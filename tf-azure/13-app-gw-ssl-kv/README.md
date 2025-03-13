@@ -1,7 +1,8 @@
 # Gateway
 
-1. Create a keyvaut 
+1. Run the terraform apply
 
-2. Add a cert in KV
-
-3. Create an 
+2. Access 
+    https://20.106.211.110
+    
+    https://20.106.211.110/app1/
