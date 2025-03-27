@@ -5,7 +5,7 @@ resource "azurerm_public_ip" "gatewayip" {
   allocation_method   = "Static"
   sku                 = "Standard"
   #sku_tier            = "Regional"
-  zones = [ 1]
+  zones = var.zones
 }
 
 # We need an additional subnet in the virtual network
@@ -21,7 +21,7 @@ resource "azurerm_application_gateway" "this" {
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
 
-  zones = [ "1"]
+  zones = var.zones
 
   sku {
     name     = "Standard_v2"

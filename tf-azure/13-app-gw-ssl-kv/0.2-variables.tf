@@ -28,11 +28,6 @@ variable "ssl_cert_name" {
   type = string
 }
 
-variable "kv_scret_id" {
-  type = string
-}
-
-
-variable "user_assigned_identity" {
-  type = string
+variable "zones" {
+  type    = list(number)
 }
