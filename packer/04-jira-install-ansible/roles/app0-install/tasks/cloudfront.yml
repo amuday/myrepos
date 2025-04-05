@@ -1,0 +1,20 @@
+- name: discover cloudfront distributions
+  cloudfront_info:
+    summary: true
+    profile: "{{ aws_profile }}"
+  register: all_cf_dists
+  delegate_to: localhost
+  become: false
+  run_once: true
+
+- name: create a batch of invalidations using a distribution_id for a reference
+  cloudfront_invalidation:
+    distribution_id: "{{ item.Id }}"
+    target_paths:
+      - /*
+    profile: "{{ aws_profile }}"
+  when: item.Tags.itmDiscoverName|default('undefined') == app_domain
+  delegate_to: localhost
+  become: false
+  run_once: true
+  loop: "{{ all_cf_dists.ansible_facts.cloudfront.summary.distributions }}"

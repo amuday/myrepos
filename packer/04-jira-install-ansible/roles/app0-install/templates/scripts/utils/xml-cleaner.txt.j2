@@ -1,0 +1,13 @@
+# Access to Stage S3 from Prod
+# aws configure --profile stage
+# mkdir -p /elasity-jira/temp/source
+# mkdir -p /elasity-jira/temp/working
+# AWS_PROFILE=stage aws s3 cp s3://sample-bucket/upgdryrun/jiraxmlbackup/DryRun_JIRAXML28July2019.zip /elasity-jira/temp/source/
+# cd /elasity-jira/temp/working
+# unzip /elasity-jira/temp/source/FILENAME
+
+# https://confluence.atlassian.com/jira/removing-invalid-characters-from-xml-backups-12079.html?_ga=2.35652003.240825508.1561382355-1057634610.1561382355
+
+# wget https://confluence.atlassian.com/jira/files/12079/242614279/1/1307570821061/atlassian-xml-cleaner-0.1.jar
+
+# /elasity-jira/opt/atlassian/jira/jre/bin/java -jar atlassian-xml-cleaner-0.1.jar entities.xml > entities-clean.xml

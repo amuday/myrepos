@@ -1,0 +1,17 @@
+- name: put support scripts
+  template:
+    src: "scripts/{{ item }}.j2"
+    dest: "{{ app_script_dir }}/{{ item }}"
+    mode: 0755
+  loop:
+    - psql-jira-connect.sh
+    - datacenter-home-backup.sh
+    - utils/psql-jira-import.sh
+    - utils/psql-jira-connect.sh
+    - utils/psql-jira-superadmin.sh
+    - utils/psql-fix-sequence.sh
+    - utils/xml-cleaner.txt
+    - utils/datacenter-home-restore.sh
+    - utils/pg_dump-jira.sh
+    - utils/pg_dump_to_share.sh
+    - utils/pg_restore_from_share.sh

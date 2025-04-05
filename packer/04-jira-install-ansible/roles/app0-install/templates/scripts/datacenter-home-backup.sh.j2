@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+source_dir="{{ app_shared_home_dir }}"
+dest_dir="{{ app_shared_home_dir }}-backup"
+mkdir -p $dest_dir
+
+echo "rsync started" | logger -p local7.info -t rsync-dc
+
+rsync -av --delete \
+  --exclude 'data/attachments' \
+  --exclude 'data/avatars' \
+  --exclude 'data/git-plugin' \
+  --exclude 'analytics-logs/*' \
+  --exclude 'export/Jira*.zip' \
+  --exclude 'import' \
+  $source_dir/ $dest_dir/
+
+echo "rsync completed" | logger -p local7.info -t rsync-dc

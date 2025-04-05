@@ -1,0 +1,49 @@
+#!/bin/bash
+
+info_source="{{ app_home_dir }}/dbconfig.xml"
+
+dbhost=$(grep '<url>jdbc:postgresql://' $info_source | cut -d'/' -f3 | cut -d':' -f1)
+dbname=$(grep '<url>jdbc:postgresql://' $info_source | cut -d'/' -f4 | cut -d'<' -f1)
+dbuser=$(grep '<username>' $info_source | cut -d'>' -f2 | cut -d'<' -f1)
+dbpasswd=$(grep '<password>' $info_source | cut -d'>' -f2 | cut -d'<' -f1)
+
+export PGPASSWORD=$dbpasswd
+MYPSQL="psql -U $dbuser -h $dbhost -d $dbname -P pager=off"
+
+table_list='all-tables.txt'
+sequence_list='all-sequences.txt'
+
+echo "List all tables including sequences"
+$MYPSQL -c "\d" \
+| grep 'public' > $table_list
+
+echo "Extract all sequences"
+grep 'ID_seq' $table_list | awk '{print $3}' > $sequence_list
+
+while read seq
+do
+#  echo $seq
+  table=$(echo $seq | sed 's/_ID_seq//g')
+#  echo $table
+
+#  max_id=$($MYPSQL -qtA -c "SELECT \"ID\" FROM \"$table\" ORDER BY \"ID\" DESC LIMIT 1;")
+  max_id=$($MYPSQL -qtA -c "SELECT max(\"ID\") FROM \"$table\";")
+#  echo $max_id
+  last_value=$($MYPSQL -qtA -c "SELECT last_value FROM \"$seq\";")
+#  echo $last_value
+
+  if [ -z "$max_id" ]; then
+    echo "Empty table"
+  else
+#    echo "Not empty $max_id"
+    if [ "$max_id" -gt "$last_value" ]; then
+      echo "ERROR: Table $table max_id $max_id last_value $last_value"
+#***** IMPORTANT NOTE   *****
+#***** Uncomment to fix ****
+#      $MYPSQL -c "SELECT setval('\"$seq\"',$max_id,true);"
+    else
+      echo OK
+    fi
+  fi
+
+done < $sequence_list

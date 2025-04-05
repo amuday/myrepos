@@ -1,0 +1,95 @@
+elasity_prefix: elasity
+app_vendor: atlassian
+app_http_port: 8080
+app_root_dir: "/{{ elasity_prefix }}-{{ appname }}"
+app_base_dir_map:
+  default: '{{ app_root_dir }}/opt/{{ app_vendor }}'
+app_base_dir: "{{ app_base_dir_map[env]|default(app_base_dir_map['default']) }}"
+
+app_home_dir_map:
+  default: "{{ app_root_dir }}/var/{{ app_vendor }}/application-data/{{ appname }}"
+app_home_dir: "{{ app_home_dir_map[env]|default(app_home_dir_map['default']) }}"
+
+app_install_dir_map:
+  default: "{{ app_base_dir }}/{{ appname }}"
+app_install_dir: "{{ app_install_dir_map[env]|default(app_install_dir_map['default']) }}"
+
+app_shared_dir: "/{{ elasity_prefix }}-shared"
+app_shared_home_dir: "{{ app_shared_dir }}/{{ appname }}/home"
+
+app_dir_name: "atlassian-jira-software-{{ app_version }}-standalone"
+app_file_name: "atlassian-jira-software-{{ app_version }}.tar.gz"
+app_download_url: "https://www.atlassian.com/software/jira/downloads/binary/{{ app_file_name }}"
+
+app_mark_file: /etc/{{ appname }}-installed
+
+app_protocol: "https"
+
+app_jvm_memory: "{{ (ansible_memtotal_mb * 0.50)|int if ansible_memtotal_mb > 3000 else (ansible_memtotal_mb * 0.25)|int }}m"
+
+elasity_log: /var/log/{{ appname }}
+
+app_user: "{{ appname }}"
+app_group: "{{ app_user }}"
+
+conf_server_xml_map:
+  "8.4.1": server.xml.8.4.1.j2
+  default: server.xml.j2
+conf_server_xml: "{{ conf_server_xml_map[app_version]|default(conf_server_xml_map['default']) }}"
+
+elasity_included_packages:
+  - unzip
+  - zip
+  - htop
+  - git
+  - curl
+  - libpq-dev
+  - python3-dev
+  - nfs-common
+  - python3-distutils
+  - python3-pip
+  - jq
+  - cifs-utils
+  - azure-cli
+  - postgresql-client-16
+
+elasity_excluded_packages:
+  - java-1.7.0-openjdk
+  - java-1.8.0-openjdk
+  - java-1.8.0-openjdk-devel
+
+app_included_packages:
+  - openjdk-11-jdk
+  - fontconfig
+  - libfontconfig1-dev
+
+app_datacenter: "{{ true if app_edition == 'datacenter' else false }}"
+
+app_excluded_packages: []
+
+app_jmx_port: 7099
+# app_jmx_string: "-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=true -Dcom.sun.management.jmxremote.password.file={{ app_root_dir }}/.jmxcredentials -Dcom.sun.management.jmxremote.port={{ app_jmx_port }} -Dcom.sun.management.jmxremote.local.only=true -XX:+UseG1GC -XX:+ExplicitGCInvokesConcurrent"
+app_jmx_string: "-XX:+UseG1GC -XX:+ExplicitGCInvokesConcurrent"
+
+app_data_ebs: /dev/xvdf
+app_init_file: /etc/init.d/{{ appname }}
+app_systemd_file: /lib/systemd/system/{{ appname }}.service
+app_script_dir: "{{ app_root_dir }}/scripts"
+app_temp_dir: "{{ app_root_dir }}/temp"
+app_installer_archive_dir: "{{ app_temp_dir }}/installer"
+app_shared_heap_dumps_dir: "{{ app_shared_dir }}/{{ appname }}/heap_dumps"
+app_shared_plugin_dir: "{{ app_shared_dir }}/{{ appname }}/home/plugins/installed-plugins"
+
+mysql_jdbc_driver_file: mysql-connector-java-5.1.48-bin.jar
+mysql_jdbc_driver_url: https://s3.amazonaws.com/stuffs.lab.itmethods.com/{{ mysql_jdbc_driver_file }}
+
+
+elasity_common: "{{ app_shared_dir }}/itm-common"
+
+#Ansible connection config
+#ansible_connection: "aws_ssm"
+#ansible_aws_ssm_region: "{{ aws_region }}"
+#ansible_aws_ssm_bucket_name: "{{ s3_ansible_bucket }}"
+#ansible_aws_ssm_timeout: 1800
+
+hide_sensitive_log: true

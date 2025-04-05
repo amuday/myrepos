@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+orig_dir="{{ app_shared_home_dir }}"
+backup_dir="{{ app_shared_home_dir }}-backup"
+
+mv $orig_dir/data/attachments $backup_dir/data/
+mv $orig_dir $orig_dir-orig
+mv $backup_dir $orig_dir
+
+echo "restore completed"

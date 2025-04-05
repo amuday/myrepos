@@ -1,0 +1,15 @@
+#!/bin/bash
+
+info_source="{{ app_home_dir }}/dbconfig.xml"
+
+dbhost=$(grep '<url>jdbc:postgresql://' $info_source | cut -d'/' -f3 | cut -d':' -f1)
+dbname=$(grep '<url>jdbc:postgresql://' $info_source | cut -d'/' -f4 | cut -d'<' -f1)
+dbuser=$(grep '<username>' $info_source | cut -d'>' -f2 | cut -d'<' -f1)
+dbpasswd=$(grep '<password>' $info_source | cut -d'>' -f2 | cut -d'<' -f1)
+
+if `which psql >/dev/null 2>&1`; then
+  psql -h $dbhost -U eldbadmin -d postgres
+else
+  echo "ERROR: Command psql not found, please install it first"
+  echo "Example on Amazon Linux 2: 'amazon-linux-extras install postgresql9.6'"
+fi

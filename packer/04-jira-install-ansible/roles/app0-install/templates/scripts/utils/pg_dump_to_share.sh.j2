@@ -1,0 +1,20 @@
+#!/bin/bash
+
+dbhost="{{ host }}"
+dbport="{{ port }}"
+dbname="{{ db }}"
+dbuser="{{ user }}"
+dbpasswd="{{ passwd }}"
+exportdirectory="/elasity-shared/backups"
+exportfile="$exportdirectory/$dbname-$(date +%s)"
+
+[ -d $exportdirectory ] || mkdir $exportdirectory
+
+if `which psql >/dev/null 2>&1`; then
+  echo "Exporting to file $exportfile"
+  PGPASSWORD=$dbpasswd pg_dump -h $dbhost -p $dbport -U $dbuser -F c -b -v -f $exportfile $dbname
+
+  cp -rf $exportfile $exportdirectory/$dbname-latest
+else
+  echo "ERROR: Command psql not found, please install it first"
+fi

@@ -1,0 +1,47 @@
+#!/bin/bash
+set -xe
+
+export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+if [ ! -d {{ app_shared_home_dir }} ]; then
+  echo "Datacenter shared home folder not exist. App not started."
+  exit 1
+fi
+
+echo "Datacenter script is starting..."
+
+appname='{{ appname }}'
+apphome='{{ app_home_dir }}'
+dc_file="$apphome/cluster.properties"
+tomcat_log="/var/log/$appname/tomcat"
+atlas_log="/var/log/$appname/atlassian"
+mark_file='/etc/$appname-config-updated'
+index_dir="$apphome/caches/indexes"
+indexv1_dir="$apphome/caches/indexesV1"
+
+echo "Just to make sure service disabled and stop"
+service $appname stop || true
+systemctl disable $appname.service || true
+chkconfig $appname off || true
+
+
+#if (( $compared_time < $ebs_unix_time )); then
+  echo "New instance detected"
+#  echo "Clean up old data"
+# rm -rf $tomcat_log/* $atlas_log/* /var/log/*-20*
+#  rm -rf $index_dir-backup $indexv1_dir-backup
+#  mv -f $index_dir $index_dir-backup || true
+#  mv -f $indexv1_dir $indexv1_dir-backup || true
+  echo "Update cluster node id"
+  my_ip=$(curl -H Metadata:true "http://169.254.169.254/metadata/instance/network/interface/0/ipv4/ipAddress/0/privateIpAddress?api-version=2020-09-01&format=text")
+  my_hostname=$(hostname)
+  my_mac=$(ip link show eth0 | awk '/ether/ {print $2}' | md5sum | head -c8)
+  my_node_id="$my_ip-$my_mac"
+  sed -i '/^jira.node.id/ s/.*/jira.node.id = '"$my_node_id"'/g' $dc_file
+  sed -i '/^ehcache.listener.hostName/ s/.*/ehcache.listener.hostName = '"$my_hostname"'/g' $dc_file
+#else
+#  echo "Existing instance"
+#fi
+
+echo "Finally start service"
+systemctl start $appname.service || true

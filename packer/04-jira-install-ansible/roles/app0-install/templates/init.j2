@@ -1,0 +1,43 @@
+#!/bin/bash
+#{{ appname|upper }} startup script
+#chkconfig: 2345 80 05
+#description: {{ appname|upper }}
+
+# Define some variables
+# Name of app ( JIRA, Confluence, etc )
+APP={{ appname }}
+# Name of the user to run as
+USER={{ app_user }}
+# Location of application's bin directory
+BASE={{ app_install_dir }}
+# Location of Java JDK
+#export JAVA_HOME=$BASE/jre
+
+check_ps=$(ps -ef | grep 'catalina.home={{ app_install_dir }}' | grep -v grep)
+
+case "$1" in
+  # Start command
+  start)
+    echo "Starting $APP"
+    $BASE/bin/start-jira.sh
+    ;;
+  # Stop command
+  stop)
+    echo "Stopping $APP"
+    $BASE/bin/stop-jira.sh && echo "$APP stopped successfully"
+    ;;
+  # Restart command
+  restart)
+    if [ -n "$check_ps" ]; then
+      $0 stop
+      sleep 5
+    fi
+    $0 start
+    ;;
+  *)
+    echo "Usage: /etc/init.d/$APP {start|restart|stop}"
+    exit 1
+    ;;
+esac
+
+exit 0

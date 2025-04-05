@@ -1,0 +1,39 @@
+az_subscription_id: "{{ lookup('env', 'ARM_SUBSCRIPTION_ID') }}"
+az_resource_group_name: "{{ lookup('env', 'AZURE_RESOURCE_GROUP') }}"
+env: "{{ lookup('env', 'ENVIRONMENT') }}"
+appphase: "default"
+appname: "{{ lookup('env', 'APP_NAME') }}"
+app_version: "{{ lookup('env', 'APP_VERSION') }}"
+app_domain: "{{ lookup('env', 'APP_DOMAIN') }}"
+app_restart: false
+app_final_state: stopped
+#For service desk
+sd_download_url: "{{ lookup('env', 'SERVICE_DESK_URL') }}"
+
+## fetch from Vault##
+az_storage_account_name: "{{ APP_STORAGE_ACCOUNT_NAME }}"
+az_storage_account_key: "{{ APP_STORAGE_ACCOUNT_KEY }}"
+az_file_share_name: "{{ APP_FILE_SHARE_NAME }}"
+vault_atlassian_recovery_password: "{{ DB_EAZYBI_PASS }}"
+
+#license and server_id
+server_id: "{{ SERVER_ID }}"
+license_key: "{{ LICENSE_KEY }}"
+
+#DB 
+host: "{{ DB_HOST }}"
+port: 5432
+db: "{{ appname }}db"
+user: "{{ appname }}"
+passwd: "{{ DB_PASS }}"
+admin_user: "{{ DB_ADMIN_USER }}"
+admin_passwd: "{{ DB_ADMIN_PASS }}"
+eazybi_db: easybidb
+eazybi_user: easybi
+eazybi_passwd: "{{ DB_EAZYBI_PASS }}"
+
+#Datadog
+datadog_api_key: "{{ DD_API_KEY }}"
+
+#JMX
+jmx_auth_key: "{{ JMX_AUTH_KEY }}"
